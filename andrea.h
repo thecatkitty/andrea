@@ -2,6 +2,7 @@
 #define _ANDREA_H_
 
 #include <assert.h>
+#include <i86.h>
 #include <stdint.h>
 
 #ifndef far
@@ -11,6 +12,12 @@
 #define far __far
 #endif // EDITING
 #endif // far
+
+typedef unsigned far (*andrea_registration_callback)(uint16_t far *);
+
+#define ANDREA_EXPORT(name)                                                    \
+    __attribute__((section(".preinit"))) const uint16_t __exptbl_##name =      \
+        FP_OFF(name);
 
 typedef enum
 {
@@ -49,11 +56,5 @@ typedef struct
 
 static_assert(256 == sizeof(dos_psp),
               "DOS PSP size doesn't match specification");
-
-extern void
-andrea_fptoa(char *buffer, const void far *fp);
-
-extern void far *
-andrea_atofp(const char far *buffer);
 
 #endif

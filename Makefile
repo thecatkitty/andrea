@@ -7,11 +7,11 @@ BINDIR = out
 build: $(BINDIR)/host.exe $(BINDIR)/module.exe
 
 
-$(BINDIR)/host.exe: host.c andrea.c
+$(BINDIR)/host.exe: host.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -li86
 
-$(BINDIR)/module.exe: module.S module.c andrea.c
+$(BINDIR)/module.exe: start.S module.c functions.c end.S
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
 

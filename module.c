@@ -3,9 +3,10 @@
 
 #include "andrea.h"
 
-typedef unsigned far (*lpfncallback)(unsigned);
-
 int __errno;
+
+extern void far
+andrea_exptabl(void);
 
 size_t
 strlen(const char *str)
@@ -20,8 +21,22 @@ strlen(const char *str)
     return count;
 }
 
-char *
-utoa10(unsigned value, char *buffer)
+static void far *
+_deserialize_pointer(const char far *buffer)
+{
+    uint32_t intptr = 0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        intptr <<= 4;
+        intptr |= buffer[i] - '@';
+    }
+
+    return (void far *)intptr;
+}
+
+static char *
+_utoa10(unsigned value, char *buffer)
 {
     int digits = 9999 < value  ? 5
                  : 999 < value ? 4
@@ -40,7 +55,7 @@ utoa10(unsigned value, char *buffer)
 }
 
 static void
-print(dos_stream stream, const char *str)
+_print(dos_stream stream, const char *str)
 {
     unsigned bytes;
     _dos_write(stream, _CV_FP(str), strlen(str), &bytes);
@@ -49,11 +64,11 @@ print(dos_stream stream, const char *str)
 uint8_t
 module_init(dos_psp far *psp)
 {
-    print(STDOUT, "Module entry.\r\n");
+    _print(STDOUT, "Module entry.\r\n");
 
     if (8 >= psp->cmdline_len)
     {
-        print(STDERR, "Module exit, missing parameter.\r\n");
+        _print(STDERR, "Module exit, missing parameter.\r\n");
         return ANDREA_ERROR_MISSING_PARAMETER;
     }
 
@@ -61,21 +76,22 @@ module_init(dos_psp far *psp)
     {
         if (('@' > psp->cmdline[i]) || ('O' < psp->cmdline[i]))
         {
-            print(STDERR, "Module exit, invalid parameter.\r\n");
+            _print(STDERR, "Module exit, invalid parameter.\r\n");
             return ANDREA_ERROR_INVALID_PARAMETER;
         }
     }
 
-    lpfncallback callback = (lpfncallback)andrea_atofp(psp->cmdline + 1);
+    andrea_registration_callback callback =
+        (andrea_registration_callback)_deserialize_pointer(psp->cmdline + 1);
 
-    unsigned value = callback(42);
-    print(STDOUT, "Callback returned ");
+    unsigned status = callback((uint16_t far *)andrea_exptabl);
+    _print(STDOUT, "Callback returned ");
 
     char buffer[32];
-    utoa10(value, buffer);
-    print(STDOUT, buffer);
-    print(STDOUT, ".\r\n");
+    _utoa10(status, buffer);
+    _print(STDOUT, buffer);
+    _print(STDOUT, ".\r\n");
 
-    print(STDOUT, "Module exit, ok.\r\n");
+    _print(STDOUT, "Module exit, ok.\r\n");
     return ANDREA_SUCCESS;
 }

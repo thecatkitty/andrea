@@ -21,3 +21,8 @@ _start:
     /* Exit to caller, status in AL */
     mov     ah, 0x4C
     int     0x21
+
+
+    .section .preinit
+    .global  andrea_exptabl
+andrea_exptabl:
