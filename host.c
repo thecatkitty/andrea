@@ -1,5 +1,5 @@
+#include <process.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "andrea.h"
 
@@ -37,11 +37,11 @@ _serialize_pointer(char *buffer, const void far *fp)
 int
 main(int argc, char *argv[])
 {
-    char cmd[32] = "module ";
-    _serialize_pointer(cmd + 7, _registrator);
+    char pointer[8];
+    _serialize_pointer(pointer, _registrator);
 
-    printf("Calling '%s'\n", cmd);
-    int status = system(cmd);
+    printf("Spawning module with '%s'\n", pointer);
+    int status = _spawnl(P_WAIT, "module", "module", pointer);
     printf("Returned status: %d\n", status);
     printf("%d exports\n", _export_count);
     printf("42 squared is %d\n", _value);
