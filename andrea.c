@@ -15,7 +15,7 @@ andrea_fptoa(char *buffer, const void far *fp)
 }
 
 void far *
-andrea_atofp(const char *buffer)
+andrea_atofp(const char far *buffer)
 {
     uint32_t intptr = 0;
 

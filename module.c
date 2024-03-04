@@ -1,35 +1,81 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <dos.h>
+#include <stddef.h>
 
 #include "andrea.h"
 
 typedef unsigned far (*lpfncallback)(unsigned);
 
-int
-main(int argc, char *argv[])
+int __errno;
+
+size_t
+strlen(const char *str)
 {
-    if (2 != argc)
+    size_t count = 0;
+
+    while (*str++)
     {
+        count++;
+    }
+
+    return count;
+}
+
+char *
+utoa10(unsigned value, char *buffer)
+{
+    int digits = 9999 < value  ? 5
+                 : 999 < value ? 4
+                 : 99 < value  ? 3
+                 : 9 < value   ? 2
+                               : 1;
+
+    for (int i = 1; i <= digits; i++)
+    {
+        buffer[digits - i] = '0' + (value % 10);
+        value /= 10;
+    }
+
+    buffer[digits] = 0;
+    return buffer;
+}
+
+static void
+print(dos_stream stream, const char *str)
+{
+    unsigned bytes;
+    _dos_write(stream, _CV_FP(str), strlen(str), &bytes);
+}
+
+uint8_t
+module_init(dos_psp far *psp)
+{
+    print(STDOUT, "Module entry.\r\n");
+
+    if (8 >= psp->cmdline_len)
+    {
+        print(STDERR, "Module exit, missing parameter.\r\n");
         return ANDREA_ERROR_MISSING_PARAMETER;
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 1; i < 9; i++)
     {
-        if (('@' > argv[1][i]) || ('O' < argv[1][i]))
+        if (('@' > psp->cmdline[i]) || ('O' < psp->cmdline[i]))
         {
+            print(STDERR, "Module exit, invalid parameter.\r\n");
             return ANDREA_ERROR_INVALID_PARAMETER;
         }
     }
 
-    lpfncallback callback = (lpfncallback)andrea_atofp(argv[1]);
+    lpfncallback callback = (lpfncallback)andrea_atofp(psp->cmdline + 1);
 
     unsigned value = callback(42);
-    fputs("Callback returned ", stdout);
+    print(STDOUT, "Callback returned ");
 
     char buffer[32];
-    __utoa(value, buffer, 10);
-    fputs(buffer, stdout);
-    fputs(".\n", stdout);
+    utoa10(value, buffer);
+    print(STDOUT, buffer);
+    print(STDOUT, ".\r\n");
 
-    return 0;
+    print(STDOUT, "Module exit, ok.\r\n");
+    return ANDREA_SUCCESS;
 }

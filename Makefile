@@ -1,16 +1,20 @@
 CC = ia16-elf-gcc
 
+CFLAGS = -mcmodel=small -march=i8088 -Os
 
-build: host.exe module.exe
+BINDIR = out
+
+build: $(BINDIR)/host.exe $(BINDIR)/module.exe
 
 
-host.exe: host.c andrea.c
-	$(CC) -mcmodel=small -o $@ $^ -Xlinker -Map=$@.map -li86
+$(BINDIR)/host.exe: host.c andrea.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -li86
 
-module.exe: module.c andrea.c
-	$(CC) -mcmodel=small -o $@ $^ -Xlinker -Map=$@.map
+$(BINDIR)/module.exe: module.S module.c andrea.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
 
 
 clean:
-	rm *.exe
-	rm *.map
+	rm -rf $(BINDIR)
