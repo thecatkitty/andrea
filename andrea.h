@@ -14,6 +14,7 @@
 #endif // far
 
 typedef unsigned far (*andrea_registration_callback)(uint16_t far *);
+typedef uint16_t andrea_module;
 
 #define ANDREA_EXPORT(name)                                                    \
     __attribute__((section(".preinit"))) const uint16_t __exptbl_##name =      \
@@ -56,5 +57,14 @@ typedef struct
 
 static_assert(256 == sizeof(dos_psp),
               "DOS PSP size doesn't match specification");
+
+extern andrea_module
+andrea_load(const char *name);
+
+extern void
+andrea_free(andrea_module module);
+
+extern void far *
+andrea_get_procedure(andrea_module module, uint16_t ordinal);
 
 #endif

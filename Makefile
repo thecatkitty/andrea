@@ -7,7 +7,7 @@ BINDIR = out
 build: $(BINDIR)/host.exe $(BINDIR)/module.exe
 
 
-$(BINDIR)/host.exe: host.c
+$(BINDIR)/host.exe: host.c loader.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -li86
 
