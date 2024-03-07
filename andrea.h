@@ -20,11 +20,15 @@ typedef uint16_t andrea_module;
     __attribute__((section(".preinit"))) const uint16_t __exptbl_##name =      \
         FP_OFF(name);
 
+#define ANDREA_MAX_MODULES 5
+
 typedef enum
 {
     ANDREA_SUCCESS = 0x00,
     ANDREA_ERROR_MISSING_PARAMETER = 0x80,
     ANDREA_ERROR_INVALID_PARAMETER = 0x81,
+    ANDREA_ERROR_TOO_MANY_MODULES = 0x82,
+    ANDREA_ERROR_NO_EXPORTS = 0x83,
 } andrea_status;
 
 typedef enum

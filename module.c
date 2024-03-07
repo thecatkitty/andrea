@@ -92,6 +92,6 @@ module_init(dos_psp far *psp)
     _print(STDOUT, buffer);
     _print(STDOUT, ".\r\n");
 
-    _print(STDOUT, "Module exit, ok.\r\n");
-    return ANDREA_SUCCESS;
+    _print(STDOUT, "Module exit.\r\n");
+    return status;
 }
