@@ -12,21 +12,26 @@ $(BINDIR)/host.exe: host.c $(BINDIR)/libandrea-host.a
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $< -Xlinker -Map=$@.map -L$(BINDIR) -landrea-host -li86
 
-$(BINDIR)/module.exe: start.S module.c functions.c end.S
+$(BINDIR)/module.exe: $(BINDIR)/andrea-modstart.a functions.c $(BINDIR)/andrea-modend.o
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
 
-$(BINDIR)/module2.exe: start.S module.c functions2.c end.S
+$(BINDIR)/module2.exe: $(BINDIR)/andrea-modstart.a functions2.c $(BINDIR)/andrea-modend.o
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
 
 
 include host/Makefile
+include module/Makefile
 
 
 $(OBJDIR)/%.c.o: %.c
 	@mkdir -p $(@D)
 	$(CC) -c $(CFLAGS) -o $@ $^
+
+$(OBJDIR)/%.S.o: %.S
+	@mkdir -p $(@D)
+	$(CC) -c -o $@ $^
 
 
 clean:
