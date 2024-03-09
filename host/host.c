@@ -1,5 +1,5 @@
 #include <process.h>
-#include <stdio.h>
+#include <stdlib.h>
 
 #include <andrea.h>
 
@@ -82,38 +82,48 @@ _serialize_pointer(char *buffer, const void far *fp)
 andrea_module
 andrea_load(const char *name)
 {
+    LOG("entry, name: '%s'", name);
+
     if (0 == _callback_ptr[0])
     {
         _serialize_pointer(_callback_ptr, _callback);
     }
 
-    printf("Spawning module '%s' with '%s'\n", name, _callback_ptr);
+    LOG("spawning with argument '%s'", _callback_ptr);
     int status = _spawnl(P_WAIT, name, name, _callback_ptr, NULL) & 0xFF;
-    printf("Returned status: %d\n", status);
+    LOG("module returned: %d", status);
 
+    andrea_module module = 0;
     if (ANDREA_SUCCESS != status)
     {
-        return 0;
+        goto end;
     }
 
     size_t           slot = _ctx.last_slot;
     module_desc far *desc = _ctx.modules + slot;
     uint16_t far    *exports = MK_FP(desc->module, desc->exports);
-    printf("Export table of the module '%s' at %04X:\n", name, desc->module);
+    LOG("export table:");
     for (int i = 0; i <= desc->max_ordinal; i++)
     {
-        printf("%3d: %04X\n", i, exports[i]);
+        LOG("%3d: %04X", i, exports[i]);
     }
-    return _ctx.modules[slot].module;
+
+    module = _ctx.modules[slot].module;
+
+end:
+    LOG("exit, %04X", module);
+    return module;
 }
 
 void
 andrea_free(andrea_module module)
 {
+    LOG("entry, module: %04X", module);
+
     size_t slot = _find_desc(module);
     if (ANDREA_MAX_MODULES == slot)
     {
-        fputs("Module double free?\n", stderr);
+        LOG("exit, double free?");
         return;
     }
 
@@ -121,32 +131,39 @@ andrea_free(andrea_module module)
     uint16_t far    *exports = MK_FP(module, desc->exports);
 
     uint16_t status = ((exit_callback)MK_FP(module, exports[0]))();
-    printf("Module termination status %04X.\n", status);
+    LOG("termination status: %04X", status);
 
     desc->module = 0;
+    LOG("exit");
 }
 
 void far *
 andrea_get_procedure(andrea_module module, uint16_t ordinal)
 {
+    LOG("entry");
+    void far *fptr = 0;
+
     size_t slot = _find_desc(module);
     if (ANDREA_MAX_MODULES == slot)
     {
-        fputs("Not found!\n", stderr);
-        return 0;
+        LOG("not found!");
+        goto end;
     }
 
     module_desc far *desc = _ctx.modules + slot;
     if (desc->max_ordinal < ordinal)
     {
-        fputs("Ordinal!\n", stderr);
-        return 0;
+        LOG("ordinal too high!");
+        goto end;
     }
 
-    printf(
-        "Module %04X: slot: %u, module: %04X, exports: %04X, max_ordinal: %u\n",
-        module, slot, desc->module, desc->exports, desc->max_ordinal);
+    LOG("slot: %u, module: %04X, exports: %04X, max_ordinal: %u", slot,
+        desc->module, desc->exports, desc->max_ordinal);
 
     uint16_t far *exports = MK_FP(module, desc->exports);
-    return MK_FP(module, exports[ordinal]);
+    fptr = MK_FP(module, exports[ordinal]);
+
+end:
+    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
+    return fptr;
 }

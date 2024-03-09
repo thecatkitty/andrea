@@ -11,6 +11,11 @@ BINDIR = bin
 OBJDIR = obj
 
 
+ifdef LOGS
+	CFLAGS += -DANDREA_LOGS_ENABLE
+endif
+
+
 build: \
 	$(BINDIR)/chost.exe \
 	$(BINDIR)/module1.exe \

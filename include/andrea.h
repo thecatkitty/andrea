@@ -71,4 +71,17 @@ andrea_free(andrea_module module);
 extern void far *
 andrea_get_procedure(andrea_module module, uint16_t ordinal);
 
-#endif
+#ifdef ANDREA_LOGS_ENABLE
+
+extern void
+andrea_log(const char *location, const char *format, ...);
+
+#define LOG(...) andrea_log(__func__, __VA_ARGS__)
+
+#else // ANDREA_LOGS_ENABLE
+
+#define LOG(...)
+
+#endif // ANDREA_LOGS_ENABLE
+
+#endif // _ANDREA_H_
