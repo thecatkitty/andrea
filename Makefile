@@ -1,28 +1,25 @@
 CC = ia16-elf-gcc
 
-CFLAGS = -mcmodel=small -march=i8088 -Os -Iinclude
+CFLAGS  = -mcmodel=small -march=i8088 -Os -Iinclude
+LDFLAGS = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
+
+MOD_LDFLAGS = $(LDFLAGS) -nostdlib
+MOD_START   = $(BINDIR)/andrea-modstart.a
+MOD_END     = $(BINDIR)/andrea-modend.o
 
 BINDIR = bin
 OBJDIR = obj
 
-build: $(BINDIR)/host.exe $(BINDIR)/module.exe $(BINDIR)/module2.exe
 
-
-$(BINDIR)/host.exe: host.c $(BINDIR)/libandrea-host.a
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $< -Xlinker -Map=$@.map -L$(BINDIR) -landrea-host -li86
-
-$(BINDIR)/module.exe: $(BINDIR)/andrea-modstart.a functions.c $(BINDIR)/andrea-modend.o
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
-
-$(BINDIR)/module2.exe: $(BINDIR)/andrea-modstart.a functions2.c $(BINDIR)/andrea-modend.o
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $^ -Xlinker -Map=$@.map -nostdlib -li86
+build: \
+	$(BINDIR)/chost.exe \
+	$(BINDIR)/module1.exe \
+	$(BINDIR)/module2.exe
 
 
 include host/Makefile
 include module/Makefile
+include examples/Makefile
 
 
 $(OBJDIR)/%.c.o: %.c

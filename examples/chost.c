@@ -8,13 +8,13 @@ typedef void far (*lpfnhello)(void);
 int
 main(int argc, char *argv[])
 {
-    andrea_module module = andrea_load("module");
-    if (0 == module)
+    andrea_module module1 = andrea_load("module1");
+    if (0 == module1)
     {
-        fprintf(stderr, "Cannot load module!\n");
+        fprintf(stderr, "Cannot load module1!\n");
         return 1;
     }
-    printf("Module loaded as %04X!\n", module);
+    printf("Module1 loaded as %04X!\n", module1);
     getchar();
 
     andrea_module module2 = andrea_load("module2");
@@ -26,7 +26,7 @@ main(int argc, char *argv[])
     printf("Module2 loaded as %04X!\n", module2);
     getchar();
 
-    lpfnsquare square = (lpfnsquare)andrea_get_procedure(module, 1);
+    lpfnsquare square = (lpfnsquare)andrea_get_procedure(module1, 1);
     if (0 == square)
     {
         fprintf(stderr, "Cannot get procedure!\n");
@@ -39,7 +39,7 @@ main(int argc, char *argv[])
     puts("Square called!");
     getchar();
 
-    andrea_free(module);
+    andrea_free(module1);
     puts("Module freed!");
     getchar();
 

@@ -1,10 +1,10 @@
-$(BINDIR)/andrea-modstart.a: \
+$(MOD_START): \
 		$(OBJDIR)/module/start.S.o \
 		$(OBJDIR)/module/init.c.o
 	@mkdir -p $(@D)
 	ar -rcs $@ $^
 
-$(BINDIR)/andrea-modend.o: \
+$(MOD_END): \
 		$(OBJDIR)/module/end.S.o
 	@mkdir -p $(@D)
 	cp $< $@
