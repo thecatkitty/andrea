@@ -1,7 +1,7 @@
 #include <dos.h>
 #include <stddef.h>
 
-#include "andrea.h"
+#include <andrea.h>
 
 int __errno;
 

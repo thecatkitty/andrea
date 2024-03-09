@@ -1,6 +1,6 @@
 #include <dos.h>
 
-#include "andrea.h"
+#include <andrea.h>
 
 __attribute__((section(".text"))) static const char far _hello[] =
     "Hello World!\r\n$";

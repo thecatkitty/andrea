@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "andrea.h"
+#include <andrea.h>
 
 typedef int far (*lpfnsquare)(int);
 typedef void far (*lpfnhello)(void);

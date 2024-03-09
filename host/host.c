@@ -1,7 +1,7 @@
 #include <process.h>
 #include <stdio.h>
 
-#include "andrea.h"
+#include <andrea.h>
 
 typedef uint16_t far (*exit_callback)(void);
 
