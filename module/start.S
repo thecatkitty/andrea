@@ -28,7 +28,7 @@ _start:
 
     /* Exit to caller and stay resident, status in AL */
     mov     ah, 0x31
-    mov     dx, offset __etext_padded
+    mov     dx, (offset __etext_padded) + 0x200
     add     dx, (offset __ebss) + 15
     mov     cl, 4
     shr     dx, cl
