@@ -2,65 +2,82 @@
 
 #include <andrea.h>
 
-typedef int far (*lpfnsquare)(int);
+typedef int  far (*lpfnsquare)(int);
 typedef void far (*lpfnhello)(void);
+
+static andrea_module
+_try_load_module(const char *name)
+{
+    andrea_module module = andrea_load(name);
+    if (0 == module)
+    {
+        fprintf(stderr, "Cannot load '%s'!\n", name);
+    }
+    else
+    {
+        printf("'%s' loaded as %04X!\n", name, module);
+    }
+
+    return module;
+}
+
+static void far *
+_try_get_procedure(andrea_module module, uint16_t ordinal)
+{
+    void far *procedure = andrea_get_procedure(module, ordinal);
+    if (0 == procedure)
+    {
+        fprintf(stderr, "Cannot get procedure %u of %04X!\n", ordinal, module);
+    }
+    else
+    {
+        printf("Got procedure %u: %04X:%04X\n", ordinal, FP_SEG(procedure),
+               FP_OFF(procedure));
+    }
+
+    return procedure;
+}
+
+#define TRY_STEP(variable, expression)                                         \
+    if (0 == ((variable) = (expression)))                                      \
+    {                                                                          \
+        return 1;                                                              \
+    }                                                                          \
+    getchar();
+
+#define STEP(message, block)                                                   \
+    {                                                                          \
+        puts("'" message "' start");                                           \
+        block;                                                                 \
+        puts("'" message "' end");                                             \
+        getchar();                                                             \
+    }
 
 int
 main(int argc, char *argv[])
 {
-    andrea_module module1 = andrea_load("module1");
-    if (0 == module1)
-    {
-        fprintf(stderr, "Cannot load module1!\n");
-        return 1;
-    }
-    printf("Module1 loaded as %04X!\n", module1);
-    getchar();
+    puts("Host start");
 
-    andrea_module module2 = andrea_load("module2");
-    if (0 == module2)
-    {
-        fprintf(stderr, "Cannot load module2!\n");
-        return 1;
-    }
-    printf("Module2 loaded as %04X!\n", module2);
-    getchar();
+    andrea_module module1;
+    TRY_STEP(module1, _try_load_module("module1"));
 
-    lpfnsquare square = (lpfnsquare)andrea_get_procedure(module1, 1);
-    if (0 == square)
-    {
-        fprintf(stderr, "Cannot get procedure!\n");
-        return 1;
-    }
-    printf("Square got: %04X:%04X\n", FP_SEG(square), FP_OFF(square));
-    getchar();
+    andrea_module module2;
+    TRY_STEP(module2, _try_load_module("module2"));
 
-    printf("42 squared is %d\n", square(42));
-    puts("Square called!");
-    getchar();
+    lpfnsquare square;
+    TRY_STEP(square, (lpfnsquare)_try_get_procedure(module1, 1));
 
-    andrea_free(module1);
-    puts("Module freed!");
-    getchar();
+    STEP("Call square", printf("42 squared is %d\n", square(42)));
 
-    lpfnhello hello = (lpfnhello)andrea_get_procedure(module2, 1);
-    if (0 == hello)
-    {
-        fprintf(stderr, "Cannot get procedure!\n");
-        return 1;
-    }
-    printf("Hello got: %04X:%04X\n", FP_SEG(hello), FP_OFF(hello));
-    getchar();
+    STEP("Free module1", andrea_free(module1));
 
-    hello();
-    puts("Hello called!");
-    getchar();
+    lpfnhello hello;
+    TRY_STEP(hello, (lpfnhello)_try_get_procedure(module2, 1));
 
-    andrea_free(module2);
-    puts("Module2 freed!");
-    getchar();
+    STEP("Call hello", hello());
 
-    printf("Host end.\n");
+    STEP("Free module2", andrea_free(module2));
 
+    puts("Host end");
     return 0;
 }
