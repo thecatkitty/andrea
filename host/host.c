@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include <dos.h>
 #include <libi86/string.h>
 #include <stdlib.h>
@@ -141,6 +142,37 @@ end:
     return fptr;
 }
 
+static void far *
+_from_name(size_t slot, const char far *name)
+{
+    size_t length = _fstrlen(name) + 1;
+    {
+        char *lname = (char *)alloca(length);
+        _fstrcpy(lname, name);
+        LOG("entry, slot: %u, name: %s", slot, lname);
+    }
+    void far *fptr = 0;
+
+    module_desc far *desc = _ctx.modules + slot;
+    uint16_t far    *exports = MK_FP(desc->module, desc->exports);
+    const char far *names = (const char far *)(exports + desc->max_ordinal + 2);
+    for (unsigned i = 0; i <= desc->max_ordinal; i++)
+    {
+        if (0 == _fmemcmp(names, name, length))
+        {
+            fptr = _from_ordinal(slot, i);
+            break;
+        }
+
+        while (*names++)
+            ;
+    }
+
+end:
+    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
+    return fptr;
+}
+
 andrea_module
 andrea_load(const char *name)
 {
@@ -209,7 +241,8 @@ andrea_get_procedure(andrea_module module, const char far *name)
         goto end;
     }
 
-    fptr = _from_ordinal(slot, FP_OFF(name));
+    fptr = FP_SEG(name) ? _from_name(slot, name)
+                        : _from_ordinal(slot, FP_OFF(name));
 
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
@@ -246,15 +279,10 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
     }
 
     const char far *names = (const char far *)(exports + desc->max_ordinal + 2);
-    for (unsigned i = 0; i < ordinal;)
+    for (unsigned i = 0; i < ordinal; i++)
     {
-        while (*names)
-        {
-            names++;
-        }
-
-        i++;
-        names++;
+        while (*names++)
+            ;
     }
 
     const char far *end = names;
