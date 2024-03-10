@@ -14,6 +14,8 @@ typedef uint16_t andrea_module;
     __attribute__((section(".preinit.str"))) const char __expstr_##name[] =    \
         #name;
 
+#define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
+
 #define ANDREA_MAX_MODULES 5
 
 typedef enum
@@ -32,7 +34,7 @@ extern void
 andrea_free(andrea_module module);
 
 extern void far *
-andrea_get_procedure(andrea_module module, uint16_t ordinal);
+andrea_get_procedure(andrea_module module, const char far *name);
 
 extern size_t
 andrea_get_procedure_name(void far *procedure, char *buffer, size_t size);
