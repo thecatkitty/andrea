@@ -1,3 +1,4 @@
+#include <libi86/string.h>
 #include <process.h>
 #include <stdlib.h>
 
@@ -140,7 +141,7 @@ andrea_free(andrea_module module)
 void far *
 andrea_get_procedure(andrea_module module, uint16_t ordinal)
 {
-    LOG("entry");
+    LOG("entry, module: %04X, ordinal: %u", module, ordinal);
     void far *fptr = 0;
 
     size_t slot = _find_desc(module);
@@ -166,4 +167,66 @@ andrea_get_procedure(andrea_module module, uint16_t ordinal)
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
     return fptr;
+}
+
+size_t
+andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
+{
+    LOG("entry, procedure: %04X:%04X, buffer: %04X, size: %zu",
+        FP_SEG(procedure), FP_OFF(procedure), buffer, size);
+    uint16_t module = FP_SEG(procedure), offset = FP_OFF(procedure);
+
+    size_t length = 0;
+    size_t slot = _find_desc(FP_SEG(procedure));
+    if (ANDREA_MAX_MODULES == slot)
+    {
+        LOG("module not found!");
+        goto end;
+    }
+
+    module_desc far *desc = _ctx.modules + slot;
+    uint16_t far    *exports = MK_FP(module, desc->exports);
+
+    uint16_t ordinal = 0;
+    while (offset != exports[ordinal])
+    {
+        ordinal++;
+        if (ordinal > desc->max_ordinal)
+        {
+            LOG("procedure not found!");
+            goto end;
+        }
+    }
+
+    const char far *names = (const char far *)(exports + desc->max_ordinal + 2);
+    for (unsigned i = 0; i < ordinal;)
+    {
+        while (*names)
+        {
+            names++;
+        }
+
+        i++;
+        names++;
+    }
+
+    const char far *end = names;
+    while (*end)
+    {
+        end++;
+    }
+
+    length = end - names;
+    if (length >= size)
+    {
+        buffer[0] = 0;
+        goto end;
+    }
+
+    length++;
+    _fmemcpy(buffer, names, length);
+
+end:
+    LOG("exit, %zu", length);
+    return length;
 }

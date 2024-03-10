@@ -2,6 +2,7 @@
 #define _DOSDEF_H_
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifndef far

@@ -28,13 +28,20 @@ _try_get_procedure(andrea_module module, uint16_t ordinal)
     if (0 == procedure)
     {
         fprintf(stderr, "Cannot get procedure %u of %04X!\n", ordinal, module);
-    }
-    else
-    {
-        printf("Got procedure %u: %04X:%04X\n", ordinal, FP_SEG(procedure),
-               FP_OFF(procedure));
+        goto end;
     }
 
+    printf("Got procedure %u: %04X:%04X", ordinal, FP_SEG(procedure),
+           FP_OFF(procedure));
+
+    char name[32];
+    if (andrea_get_procedure_name(procedure, name, sizeof(name)))
+    {
+        printf(" (%s)", name);
+    }
+    puts("");
+
+end:
     return procedure;
 }
 
