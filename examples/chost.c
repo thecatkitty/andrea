@@ -66,10 +66,10 @@ main(int argc, char *argv[])
     puts("Host start");
 
     andrea_module module1;
-    TRY_STEP(module1, _try_load_module("module1"));
+    TRY_STEP(module1, _try_load_module("module1.exe"));
 
     andrea_module module2;
-    TRY_STEP(module2, _try_load_module("module2"));
+    TRY_STEP(module2, _try_load_module("module2.exe"));
 
     lpfnsquare square;
     TRY_STEP(square, (lpfnsquare)_try_get_procedure(module1, 1));

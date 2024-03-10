@@ -1,5 +1,5 @@
+#include <dos.h>
 #include <libi86/string.h>
-#include <process.h>
 #include <stdlib.h>
 
 #include <andrea.h>
@@ -80,6 +80,46 @@ _serialize_pointer(char *buffer, const void far *fp)
     buffer[8] = 0;
 }
 
+static int
+_load_module(const char *name, const char *cmdline)
+{
+    LOG("entry, name: '%s', cmdline: '%s'", name, cmdline);
+
+    size_t length = strlen(cmdline);
+    length = (length > 125) ? 125 : length;
+
+    char argb[128];
+    argb[0] = length + 2;
+    argb[1] = ' ';
+    strncpy(argb + 2, cmdline, length);
+    argb[length + 2] = '\r';
+
+    union _dosspawn_t spawn;
+    memset(&spawn, 0, sizeof(spawn));
+    spawn._proc_run._argv = _CV_FP(argb);
+
+    int status;
+    if (0 != (status = _dos_spawn(0, name, &spawn)))
+    {
+        LOG("cannot spawn!");
+        status = -status;
+        goto end;
+    }
+
+    _dos_wait(&status);
+    if (0x0300 != (status & 0xFF00))
+    {
+        LOG("module did not stay resident!");
+        goto end;
+    }
+
+    status &= 0xFF;
+
+end:
+    LOG("exit, %d", status);
+    return status;
+}
+
 andrea_module
 andrea_load(const char *name)
 {
@@ -90,12 +130,8 @@ andrea_load(const char *name)
         _serialize_pointer(_callback_ptr, _callback);
     }
 
-    LOG("spawning with argument '%s'", _callback_ptr);
-    int status = _spawnl(P_WAIT, name, name, _callback_ptr, NULL) & 0xFF;
-    LOG("module returned: %d", status);
-
     andrea_module module = 0;
-    if (ANDREA_SUCCESS != status)
+    if (ANDREA_SUCCESS != _load_module(name, _callback_ptr))
     {
         goto end;
     }
