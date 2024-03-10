@@ -34,6 +34,9 @@ andrea_free(andrea_module module);
 extern void far *
 andrea_get_procedure(andrea_module module, uint16_t ordinal);
 
+extern size_t
+andrea_get_procedure_name(void far *procedure, char *buffer, size_t size);
+
 #ifdef ANDREA_LOGS_ENABLE
 
 extern void
