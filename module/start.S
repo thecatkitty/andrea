@@ -60,3 +60,9 @@ exit_module:
     .global  andrea_exptabl
 andrea_exptabl:
     .word   exit_module
+
+
+    .section .preinit.str
+    .global  andrea_expstrs
+andrea_expstrs:
+    .byte 0

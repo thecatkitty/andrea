@@ -10,7 +10,9 @@ typedef uint16_t andrea_module;
 
 #define ANDREA_EXPORT(name)                                                    \
     __attribute__((section(".preinit"))) const uint16_t __exptbl_##name =      \
-        FP_OFF(name);
+        FP_OFF(name);                                                          \
+    __attribute__((section(".preinit.str"))) const char __expstr_##name[] =    \
+        #name;
 
 #define ANDREA_MAX_MODULES 5
 
