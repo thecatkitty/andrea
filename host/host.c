@@ -120,6 +120,27 @@ end:
     return status;
 }
 
+static void far *
+_from_ordinal(size_t slot, unsigned ordinal)
+{
+    LOG("entry, slot: %u, ordinal: %u", slot, ordinal);
+    void far *fptr = 0;
+
+    module_desc far *desc = _ctx.modules + slot;
+    if (desc->max_ordinal < ordinal)
+    {
+        LOG("ordinal too high!");
+        goto end;
+    }
+
+    uint16_t far *exports = MK_FP(desc->module, desc->exports);
+    fptr = MK_FP(desc->module, exports[ordinal]);
+
+end:
+    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
+    return fptr;
+}
+
 andrea_module
 andrea_load(const char *name)
 {
@@ -175,9 +196,10 @@ andrea_free(andrea_module module)
 }
 
 void far *
-andrea_get_procedure(andrea_module module, uint16_t ordinal)
+andrea_get_procedure(andrea_module module, const char far *name)
 {
-    LOG("entry, module: %04X, ordinal: %u", module, ordinal);
+    LOG("entry, module: %04X, name: %04X:%04X", module, FP_SEG(name),
+        FP_OFF(name));
     void far *fptr = 0;
 
     size_t slot = _find_desc(module);
@@ -187,18 +209,7 @@ andrea_get_procedure(andrea_module module, uint16_t ordinal)
         goto end;
     }
 
-    module_desc far *desc = _ctx.modules + slot;
-    if (desc->max_ordinal < ordinal)
-    {
-        LOG("ordinal too high!");
-        goto end;
-    }
-
-    LOG("slot: %u, module: %04X, exports: %04X, max_ordinal: %u", slot,
-        desc->module, desc->exports, desc->max_ordinal);
-
-    uint16_t far *exports = MK_FP(module, desc->exports);
-    fptr = MK_FP(module, exports[ordinal]);
+    fptr = _from_ordinal(slot, FP_OFF(name));
 
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
