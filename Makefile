@@ -1,7 +1,8 @@
 CC = ia16-elf-gcc
 
-CFLAGS  = -mcmodel=small -march=i8088 -Os -Iinclude
-LDFLAGS = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
+CFLAGS   = -mcmodel=small -march=i8088 -Os -Iinclude
+CXXFLAGS = $(CFLAGS) -Iext/optional-1.1.0/include
+LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
 
 MOD_LDFLAGS = $(LDFLAGS) -nostdlib
 MOD_START   = $(BINDIR)/andrea-modstart.a
@@ -18,6 +19,7 @@ endif
 
 build: \
 	$(BINDIR)/chost.exe \
+	$(BINDIR)/cpphost.exe \
 	$(BINDIR)/module1.exe \
 	$(BINDIR)/module2.exe
 
@@ -30,6 +32,10 @@ include examples/Makefile
 $(OBJDIR)/%.c.o: %.c
 	@mkdir -p $(@D)
 	$(CC) -c $(CFLAGS) -o $@ $^
+
+$(OBJDIR)/%.cpp.o: %.cpp
+	@mkdir -p $(@D)
+	$(CC) -c $(CXXFLAGS) -o $@ $^
 
 $(OBJDIR)/%.S.o: %.S
 	@mkdir -p $(@D)
