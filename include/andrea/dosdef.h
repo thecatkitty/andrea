@@ -1,5 +1,5 @@
-#ifndef _DOSDEF_H_
-#define _DOSDEF_H_
+#ifndef _ANDREA_DOSDEF_H_
+#define _ANDREA_DOSDEF_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -44,4 +44,4 @@ typedef struct
 static_assert(256 == sizeof(dos_psp),
               "DOS PSP size doesn't match specification");
 
-#endif // _DOSDEF_H_
+#endif // _ANDREA_DOSDEF_H_

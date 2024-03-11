@@ -3,7 +3,7 @@
 
 #include <i86.h>
 
-#include <dosdef.h>
+#include <andrea/dosdef.h>
 
 typedef unsigned far (*andrea_registration_callback)(uint16_t far *);
 typedef uint16_t andrea_module;
