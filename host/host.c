@@ -11,6 +11,7 @@ typedef struct
 {
     andrea_module module;
     uint16_t      exports;
+    uint16_t      strings;
     uint16_t      max_ordinal;
 } module_desc;
 
@@ -39,7 +40,7 @@ _find_desc(andrea_module module)
 }
 
 static unsigned far
-_callback(uint16_t far *exports)
+_callback(andrea_header far *header)
 {
     size_t slot = _find_desc(0);
     if (ANDREA_MAX_MODULES == slot)
@@ -47,21 +48,21 @@ _callback(uint16_t far *exports)
         return ANDREA_ERROR_TOO_MANY_MODULES;
     }
 
-    if (0 == exports[0])
+    if (ANDREA_SIGNATURE != header->signature)
+    {
+        return ANDREA_ERROR_NO_EXPORTS;
+    }
+
+    if (0 == header->num_exports)
     {
         return ANDREA_ERROR_NO_EXPORTS;
     }
 
     module_desc far *desc = _ctx.modules + slot;
-    desc->module = FP_SEG(exports);
-    desc->exports = FP_OFF(exports);
-
-    uint16_t ordinal = 1;
-    while (0 != exports[ordinal])
-    {
-        ordinal++;
-    }
-    desc->max_ordinal = ordinal - 1;
+    desc->module = FP_SEG(header);
+    desc->exports = FP_OFF(header) + sizeof(andrea_header);
+    desc->strings = desc->exports + (header->num_exports * sizeof(uint16_t));
+    desc->max_ordinal = header->num_exports - 1;
 
     _ctx.last_slot = slot;
     return ANDREA_SUCCESS;
@@ -154,8 +155,7 @@ _from_name(size_t slot, const char far *name)
     void far *fptr = 0;
 
     module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(desc->module, desc->exports);
-    const char far *names = (const char far *)(exports + desc->max_ordinal + 2);
+    const char far  *names = MK_FP(desc->module, desc->strings);
     for (unsigned i = 0; i <= desc->max_ordinal; i++)
     {
         if (0 == _fmemcmp(names, name, length))
@@ -278,7 +278,7 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
         }
     }
 
-    const char far *names = (const char far *)(exports + desc->max_ordinal + 2);
+    const char far *names = MK_FP(desc->module, desc->strings);
     for (unsigned i = 0; i < ordinal; i++)
     {
         while (*names++)

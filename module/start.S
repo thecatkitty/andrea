@@ -56,13 +56,13 @@ exit_module:
     retf
 
 
-    .section .preinit
+    .section .andrea.exports
     .global  andrea_exptabl
 andrea_exptabl:
     .word   exit_module
 
 
-    .section .preinit.str
+    .section .andrea.strings
     .global  andrea_expstrs
 andrea_expstrs:
     .byte 0

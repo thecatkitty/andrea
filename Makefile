@@ -4,9 +4,9 @@ CFLAGS   = -mcmodel=small -march=i8088 -Os -Iinclude
 CXXFLAGS = $(CFLAGS) -Iext/optional/include
 LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
 
-MOD_LDFLAGS = $(LDFLAGS) -nostdlib
+MOD_LD      = $(BINDIR)/andrea-module.ld
+MOD_LDFLAGS = $(LDFLAGS) -nostdlib -T $(MOD_LD)
 MOD_START   = $(BINDIR)/andrea-modstart.a
-MOD_END     = $(BINDIR)/andrea-modend.o
 
 BINDIR = bin
 OBJDIR = obj

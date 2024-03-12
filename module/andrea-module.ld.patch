@@ -1,0 +1,24 @@
+--- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
++++ bin/andrea-module.ld	2024-03-12 23:03:21.620108000 +0100
+@@ -297,6 +297,21 @@
+     /* Target text sections.  */
+     .text : {
+ 		__stext = .;
++
++		/* Signature */
++		LONG (0x61657226)
++
++		/* Export table length */
++		SHORT ((__andrea_eexports - __andrea_sexports) / 2)
++
++		/* Export table */
++		__andrea_sexports = .;
++		*(.andrea.exports)
++		__andrea_eexports = .;
++
++		/* Export strings */
++		*(.andrea.strings)
++
+ 		*(.startupA)
+ 		*(.startupB)
+ 		*(.startupC)
