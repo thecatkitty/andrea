@@ -1,7 +1,7 @@
 CC = ia16-elf-gcc
 
 CFLAGS   = -mcmodel=small -march=i8088 -Os -Iinclude
-CXXFLAGS = $(CFLAGS) -Iext/optional-1.1.0/include
+CXXFLAGS = $(CFLAGS) -Iext/optional/include
 LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
 
 MOD_LDFLAGS = $(LDFLAGS) -nostdlib
