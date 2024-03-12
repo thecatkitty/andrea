@@ -5,11 +5,12 @@ endif
 $(MOD_START): \
 		$(OBJDIR)/module/start.S.o \
 		$(OBJDIR)/module/init.c.o \
-		$(MOD_LOGS)
+		$(MOD_LOGS) \
+		$(MOD_LD)
 	@mkdir -p $(@D)
-	ar -rcs $@ $^
+	ar -rcs $@ $(filter %.o,$^)
 
-$(MOD_END): \
-		$(OBJDIR)/module/end.S.o
+$(MOD_LD): \
+		module/andrea-module.ld.patch
 	@mkdir -p $(@D)
-	cp $< $@
+	patch -i $< -o $@ /usr/ia16-elf/lib/dos-ms.ld

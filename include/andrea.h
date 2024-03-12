@@ -5,16 +5,26 @@
 
 #include <andrea/dosdef.h>
 
-typedef unsigned far (*andrea_registration_callback)(uint16_t far *);
+#pragma pack(push, 1)
+typedef struct
+{
+    uint32_t signature;
+    uint16_t num_exports;
+} andrea_header;
+#pragma pack(pop)
+
+typedef unsigned far (*andrea_registration_callback)(andrea_header far *);
 typedef uint16_t andrea_module;
 
 #define ANDREA_EXPORT(name)                                                    \
-    __attribute__((section(".preinit"))) const uint16_t __exptbl_##name =      \
-        FP_OFF(name);                                                          \
-    __attribute__((section(".preinit.str"))) const char __expstr_##name[] =    \
+    __attribute__((section(".andrea.exports")))                                \
+    const uint16_t __exptbl_##name = FP_OFF(name);                             \
+    __attribute__((section(".andrea.strings"))) const char __expstr_##name[] = \
         #name;
 
 #define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
+
+#define ANDREA_SIGNATURE 0x61657226UL
 
 #define ANDREA_MAX_MODULES 5
 

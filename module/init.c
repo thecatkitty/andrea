@@ -4,6 +4,8 @@
 
 int __errno;
 
+extern andrea_header far __stext;
+
 extern void far
 andrea_exptabl(void);
 
@@ -44,7 +46,7 @@ module_init(dos_psp far *psp)
     andrea_registration_callback callback =
         (andrea_registration_callback)_deserialize_pointer(psp->cmdline + 1);
 
-    unsigned status = callback((uint16_t far *)andrea_exptabl);
+    unsigned status = callback(&__stext);
 
     LOG("exit, status:");
     switch (status)
