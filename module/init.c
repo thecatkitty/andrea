@@ -43,30 +43,13 @@ module_init(dos_psp far *psp)
         }
     }
 
-    andrea_registration_callback callback =
-        (andrea_registration_callback)_deserialize_pointer(psp->cmdline + 1);
+    module_desc far *desc =
+        (module_desc far *)_deserialize_pointer(psp->cmdline + 1);
+    desc->module = FP_SEG(&__stext);
+    desc->exports = FP_OFF(&__stext) + sizeof(andrea_header);
+    desc->strings = desc->exports + (__stext.num_exports * sizeof(uint16_t));
+    desc->max_ordinal = __stext.num_exports - 1;
 
-    unsigned status = callback(&__stext);
-
-    LOG("exit, status:");
-    switch (status)
-    {
-    case ANDREA_SUCCESS:
-        LOG("  success");
-        break;
-
-    case ANDREA_ERROR_TOO_MANY_MODULES:
-        LOG("  too many modules!");
-        break;
-
-    case ANDREA_ERROR_NO_EXPORTS:
-        LOG("  no exports!");
-        break;
-
-    default:
-        LOG("  unknown error!");
-        break;
-    }
-
-    return status;
+    LOG("exit, ok");
+    return ANDREA_SUCCESS;
 }

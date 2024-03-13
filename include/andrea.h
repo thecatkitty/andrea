@@ -5,16 +5,27 @@
 
 #include <andrea/dosdef.h>
 
+typedef uint16_t andrea_module;
+
 #pragma pack(push, 1)
+
+// Header in the module's TEXT segment, just before the exports table
 typedef struct
 {
     uint32_t signature;
     uint16_t num_exports;
 } andrea_header;
-#pragma pack(pop)
 
-typedef unsigned far (*andrea_registration_callback)(andrea_header far *);
-typedef uint16_t andrea_module;
+// Module descriptor, populated by the callee
+typedef struct
+{
+    andrea_module module;
+    uint16_t      exports;
+    uint16_t      strings;
+    uint16_t      max_ordinal;
+} module_desc;
+
+#pragma pack(pop)
 
 #define ANDREA_EXPORT(name)                                                    \
     __attribute__((section(".andrea.exports")))                                \
@@ -35,6 +46,7 @@ typedef enum
     ANDREA_ERROR_INVALID_PARAMETER = 0x81,
     ANDREA_ERROR_TOO_MANY_MODULES = 0x82,
     ANDREA_ERROR_NO_EXPORTS = 0x83,
+    ANDREA_ERROR_PROTOCOL_MISMATCH = 0x84,
 } andrea_status;
 
 extern andrea_module
