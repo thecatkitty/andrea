@@ -7,21 +7,10 @@
 
 typedef uint16_t far (*exit_callback)(void);
 
-typedef struct
-{
-    andrea_module module;
-    uint16_t      exports;
-    uint16_t      strings;
-    uint16_t      max_ordinal;
-} module_desc;
-
 struct
 {
     module_desc modules[ANDREA_MAX_MODULES];
-    size_t      last_slot;
 } far _ctx;
-
-static char _callback_ptr[9] = "";
 
 static size_t
 _find_desc(andrea_module module)
@@ -37,35 +26,6 @@ _find_desc(andrea_module module)
     }
 
     return slot;
-}
-
-static unsigned far
-_callback(andrea_header far *header)
-{
-    size_t slot = _find_desc(0);
-    if (ANDREA_MAX_MODULES == slot)
-    {
-        return ANDREA_ERROR_TOO_MANY_MODULES;
-    }
-
-    if (ANDREA_SIGNATURE != header->signature)
-    {
-        return ANDREA_ERROR_NO_EXPORTS;
-    }
-
-    if (0 == header->num_exports)
-    {
-        return ANDREA_ERROR_NO_EXPORTS;
-    }
-
-    module_desc far *desc = _ctx.modules + slot;
-    desc->module = FP_SEG(header);
-    desc->exports = FP_OFF(header) + sizeof(andrea_header);
-    desc->strings = desc->exports + (header->num_exports * sizeof(uint16_t));
-    desc->max_ordinal = header->num_exports - 1;
-
-    _ctx.last_slot = slot;
-    return ANDREA_SUCCESS;
 }
 
 static void
@@ -178,20 +138,28 @@ andrea_load(const char *name)
 {
     LOG("entry, name: '%s'", name);
 
-    if (0 == _callback_ptr[0])
+    size_t slot = _find_desc(0);
+    if (ANDREA_MAX_MODULES == slot)
     {
-        _serialize_pointer(_callback_ptr, _callback);
+        return ANDREA_ERROR_TOO_MANY_MODULES;
     }
 
+    module_desc far *desc = _ctx.modules + slot;
+
+    char ptrstr[9];
+    _serialize_pointer(ptrstr, desc);
+
     andrea_module module = 0;
-    if (ANDREA_SUCCESS != _load_module(name, _callback_ptr))
+    if (ANDREA_SUCCESS != _load_module(name, ptrstr))
     {
         goto end;
     }
 
-    size_t           slot = _ctx.last_slot;
-    module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(desc->module, desc->exports);
+    LOG("descriptor populated, module: %04X, exports: %04X, strings: %04X, "
+        "max_ordinal: %u",
+        desc->module, desc->exports, desc->strings, desc->max_ordinal);
+
+    uint16_t far *exports = MK_FP(desc->module, desc->exports);
     LOG("export table:");
     for (int i = 0; i <= desc->max_ordinal; i++)
     {
