@@ -7,10 +7,7 @@
 
 typedef uint16_t far (*exit_callback)(void);
 
-struct
-{
-    module_desc modules[ANDREA_MAX_MODULES];
-} far _ctx;
+static module_desc _modules[ANDREA_MAX_MODULES];
 
 static size_t
 _desc_from_module(andrea_module module)
@@ -19,7 +16,7 @@ _desc_from_module(andrea_module module)
 
     for (slot = 0; slot < ANDREA_MAX_MODULES; slot++)
     {
-        if (module == _ctx.modules[slot].module)
+        if (module == _modules[slot].module)
         {
             break;
         }
@@ -35,7 +32,7 @@ _desc_from_segment(uint16_t segment)
 
     for (slot = 0; slot < ANDREA_MAX_MODULES; slot++)
     {
-        if (segment == _ctx.modules[slot].segment)
+        if (segment == _modules[slot].segment)
         {
             break;
         }
@@ -104,7 +101,7 @@ _from_ordinal(size_t slot, unsigned ordinal)
     LOG("entry, slot: %u, ordinal: %u", slot, ordinal);
     void far *fptr = 0;
 
-    module_desc far *desc = _ctx.modules + slot;
+    module_desc *desc = _modules + slot;
     if (desc->max_ordinal < ordinal)
     {
         LOG("ordinal too high!");
@@ -130,8 +127,8 @@ _from_name(size_t slot, const char far *name)
     }
     void far *fptr = 0;
 
-    module_desc far *desc = _ctx.modules + slot;
-    const char far  *names = MK_FP(desc->segment, desc->strings);
+    module_desc    *desc = _modules + slot;
+    const char far *names = MK_FP(desc->segment, desc->strings);
     for (unsigned i = 0; i <= desc->max_ordinal; i++)
     {
         if (0 == _fmemcmp(names, name, length))
@@ -160,7 +157,7 @@ andrea_load(const char *name)
         return ANDREA_ERROR_TOO_MANY_MODULES;
     }
 
-    module_desc far *desc = _ctx.modules + slot;
+    module_desc far *desc = _modules + slot;
 
     char ptrstr[9];
     _serialize_pointer(ptrstr, desc);
@@ -171,8 +168,8 @@ andrea_load(const char *name)
         goto end;
     }
 
-    LOG("descriptor populated, module: %04X, exports: %04X, strings: %04X, "
-        "max_ordinal: %u",
+    LOG("descriptor populated, module: %04X, segment: %04X, exports: %04X, "
+        "strings: %04X, max_ordinal: %u",
         desc->module, desc->segment, desc->exports, desc->strings,
         desc->max_ordinal);
 
@@ -183,7 +180,7 @@ andrea_load(const char *name)
         LOG("%3d: %04X", i, exports[i]);
     }
 
-    module = _ctx.modules[slot].module;
+    module = _modules[slot].module;
 
 end:
     LOG("exit, %04X", module);
@@ -202,8 +199,8 @@ andrea_free(andrea_module module)
         return;
     }
 
-    module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(desc->segment, desc->exports);
+    module_desc  *desc = _modules + slot;
+    uint16_t far *exports = MK_FP(desc->segment, desc->exports);
 
     uint16_t status = ((exit_callback)MK_FP(desc->segment, exports[0]))();
     LOG("termination status: %04X", status);
@@ -249,8 +246,8 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
         goto end;
     }
 
-    module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(desc->segment, desc->exports);
+    module_desc  *desc = _modules + slot;
+    uint16_t far *exports = MK_FP(desc->segment, desc->exports);
 
     uint16_t ordinal = 0;
     while (offset != exports[ordinal])
