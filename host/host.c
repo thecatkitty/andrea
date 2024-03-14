@@ -189,8 +189,7 @@ andrea_free(andrea_module module)
         return;
     }
 
-    uint16_t status =
-        ((exit_callback)MK_FP(desc->segment, DESC_EXPORTS(desc)[0]))();
+    unsigned status = _dos_freemem(desc->module);
     LOG("termination status: %04X", status);
 
     desc->module = 0;

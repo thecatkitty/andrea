@@ -6,9 +6,6 @@ int __errno;
 
 extern andrea_header far __stext;
 
-extern void far
-andrea_exptabl(void);
-
 static void far *
 _deserialize_pointer(const char far *buffer)
 {
