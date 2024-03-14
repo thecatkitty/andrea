@@ -4,14 +4,9 @@
 
     .text
 
-module_psp:
-    .word   0
-
     .global _start
     .type   _start, @function
 _start:
-    mov     cs:[module_psp], es
-
     /* Small memory model, DS=SS */
     push    ss
     pop     ds
@@ -40,29 +35,6 @@ _start:
     int     0x21
 
 
-exit_module: 
-    push    es
-
-    /* Release module's PSP */
-    mov     ax, cs:[module_psp]
-    mov     es, ax
-    mov     ax, 0x4900
-    int     0x21
-    jc      .return
-    xor     ax, ax
-
-.return:
-    pop     es
-    retf
-
-
     .section .andrea.exports
     .global  andrea_exptabl
 andrea_exptabl:
-    .word   exit_module
-
-
-    .section .andrea.strings
-    .global  andrea_expstrs
-andrea_expstrs:
-    .byte 0
