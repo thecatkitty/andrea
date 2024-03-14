@@ -13,13 +13,29 @@ struct
 } far _ctx;
 
 static size_t
-_find_desc(andrea_module module)
+_desc_from_module(andrea_module module)
 {
     size_t slot;
 
     for (slot = 0; slot < ANDREA_MAX_MODULES; slot++)
     {
         if (module == _ctx.modules[slot].module)
+        {
+            break;
+        }
+    }
+
+    return slot;
+}
+
+static size_t
+_desc_from_segment(uint16_t segment)
+{
+    size_t slot;
+
+    for (slot = 0; slot < ANDREA_MAX_MODULES; slot++)
+    {
+        if (segment == _ctx.modules[slot].segment)
         {
             break;
         }
@@ -95,8 +111,8 @@ _from_ordinal(size_t slot, unsigned ordinal)
         goto end;
     }
 
-    uint16_t far *exports = MK_FP(desc->module, desc->exports);
-    fptr = MK_FP(desc->module, exports[ordinal]);
+    uint16_t far *exports = MK_FP(desc->segment, desc->exports);
+    fptr = MK_FP(desc->segment, exports[ordinal]);
 
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
@@ -115,7 +131,7 @@ _from_name(size_t slot, const char far *name)
     void far *fptr = 0;
 
     module_desc far *desc = _ctx.modules + slot;
-    const char far  *names = MK_FP(desc->module, desc->strings);
+    const char far  *names = MK_FP(desc->segment, desc->strings);
     for (unsigned i = 0; i <= desc->max_ordinal; i++)
     {
         if (0 == _fmemcmp(names, name, length))
@@ -138,7 +154,7 @@ andrea_load(const char *name)
 {
     LOG("entry, name: '%s'", name);
 
-    size_t slot = _find_desc(0);
+    size_t slot = _desc_from_module(0);
     if (ANDREA_MAX_MODULES == slot)
     {
         return ANDREA_ERROR_TOO_MANY_MODULES;
@@ -157,9 +173,10 @@ andrea_load(const char *name)
 
     LOG("descriptor populated, module: %04X, exports: %04X, strings: %04X, "
         "max_ordinal: %u",
-        desc->module, desc->exports, desc->strings, desc->max_ordinal);
+        desc->module, desc->segment, desc->exports, desc->strings,
+        desc->max_ordinal);
 
-    uint16_t far *exports = MK_FP(desc->module, desc->exports);
+    uint16_t far *exports = MK_FP(desc->segment, desc->exports);
     LOG("export table:");
     for (int i = 0; i <= desc->max_ordinal; i++)
     {
@@ -178,7 +195,7 @@ andrea_free(andrea_module module)
 {
     LOG("entry, module: %04X", module);
 
-    size_t slot = _find_desc(module);
+    size_t slot = _desc_from_module(module);
     if (ANDREA_MAX_MODULES == slot)
     {
         LOG("exit, double free?");
@@ -186,9 +203,9 @@ andrea_free(andrea_module module)
     }
 
     module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(module, desc->exports);
+    uint16_t far    *exports = MK_FP(desc->segment, desc->exports);
 
-    uint16_t status = ((exit_callback)MK_FP(module, exports[0]))();
+    uint16_t status = ((exit_callback)MK_FP(desc->segment, exports[0]))();
     LOG("termination status: %04X", status);
 
     desc->module = 0;
@@ -202,7 +219,7 @@ andrea_get_procedure(andrea_module module, const char far *name)
         FP_OFF(name));
     void far *fptr = 0;
 
-    size_t slot = _find_desc(module);
+    size_t slot = _desc_from_module(module);
     if (ANDREA_MAX_MODULES == slot)
     {
         LOG("not found!");
@@ -225,7 +242,7 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
     uint16_t module = FP_SEG(procedure), offset = FP_OFF(procedure);
 
     size_t length = 0;
-    size_t slot = _find_desc(FP_SEG(procedure));
+    size_t slot = _desc_from_segment(FP_SEG(procedure));
     if (ANDREA_MAX_MODULES == slot)
     {
         LOG("module not found!");
@@ -233,7 +250,7 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
     }
 
     module_desc far *desc = _ctx.modules + slot;
-    uint16_t far    *exports = MK_FP(module, desc->exports);
+    uint16_t far    *exports = MK_FP(desc->segment, desc->exports);
 
     uint16_t ordinal = 0;
     while (offset != exports[ordinal])
@@ -246,7 +263,7 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
         }
     }
 
-    const char far *names = MK_FP(desc->module, desc->strings);
+    const char far *names = MK_FP(desc->segment, desc->strings);
     for (unsigned i = 0; i < ordinal; i++)
     {
         while (*names++)

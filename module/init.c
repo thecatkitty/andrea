@@ -45,7 +45,8 @@ module_init(dos_psp far *psp)
 
     module_desc far *desc =
         (module_desc far *)_deserialize_pointer(psp->cmdline + 1);
-    desc->module = FP_SEG(&__stext);
+    desc->module = FP_SEG(psp);
+    desc->segment = FP_SEG(&__stext);
     desc->exports = FP_OFF(&__stext) + sizeof(andrea_header);
     desc->strings = desc->exports + (__stext.num_exports * sizeof(uint16_t));
     desc->max_ordinal = __stext.num_exports - 1;
