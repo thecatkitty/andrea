@@ -7,32 +7,21 @@
     .global _start
     .type   _start, @function
 _start:
-    /* Small memory model, DS=SS */
-    push    ss
+    /* Tiny memory model, DS=CS */
+    push    cs
     pop     ds
 
-    /* Call the initialization routine with a far pointer to PSP */
-    push    es
-    xor     ax, ax
-    push    ax
-    call    module_init
-    add     sp, 4
-
-    cmp     al, 0
-    jne     .no_tsr
-
-    /* Exit to caller and stay resident, status in AL */
-    mov     ah, 0x31
-    mov     dx, (offset __etext_padded) + 0x200
-    add     dx, (offset __ebss) + 15
-    mov     cl, 4
-    shr     dx, cl
+    /* Print out the message */
+    lea     dx, .message
+    mov     ah, 0x09
     int     0x21
 
-.no_tsr:
-    /* Exit to caller and release resources, status in AL */
-    mov     ah, 0x4C
+    /* Exit to caller and release resources, status=1 */
+    mov     ax, 0x4C01
     int     0x21
+
+.message:
+    .ascii  "This is an Andrea loadable module.\r\n$"
 
 
     .section .andrea.exports

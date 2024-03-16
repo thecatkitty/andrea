@@ -16,16 +16,6 @@ typedef struct
     uint16_t num_exports;
 } andrea_header;
 
-// Module descriptor, populated by the callee
-typedef struct
-{
-    andrea_module module;
-    uint16_t      segment;
-    uint16_t      exports;
-    uint16_t      strings;
-    uint16_t      max_ordinal;
-} module_desc;
-
 #pragma pack(pop)
 
 #define ANDREA_EXPORT(name)                                                    \

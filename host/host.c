@@ -7,6 +7,15 @@
 
 typedef uint16_t far (*exit_callback)(void);
 
+typedef struct
+{
+    andrea_module module;
+    uint16_t      segment;
+    uint16_t      exports;
+    uint16_t      strings;
+    uint16_t      max_ordinal;
+} module_desc;
+
 static module_desc _modules[ANDREA_MAX_MODULES];
 
 #define FIND_DESC(property, value)                                             \
