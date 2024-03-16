@@ -36,54 +36,71 @@ _desc_from_segment(uint16_t segment)
     return FIND_DESC(segment, segment);
 }
 
-static void
-_serialize_pointer(char *buffer, const void far *fp)
+static unsigned
+_get_psp(void)
 {
-    uint32_t intptr = (uint32_t)fp;
+    unsigned bx;
+    __asm volatile("int $0x21" : "=b"(bx) : "a"(0x5100) : "cc", "memory");
+    return bx;
+}
 
-    for (int i = 7; 0 <= i; i--)
-    {
-        buffer[i] = '@' + (intptr & 0xF);
-        intptr >>= 4;
-    }
-
-    buffer[8] = 0;
+static void
+_set_psp(unsigned psp)
+{
+    __asm volatile("int $0x21" : : "a"(0x5000), "b"(psp) : "cc", "memory");
 }
 
 static int
-_load_module(const char *name, const char *cmdline)
+_load_module(const char *name, module_desc *desc)
 {
-    LOG("entry, name: '%s', cmdline: '%s'", name, cmdline);
-
-    size_t length = strlen(cmdline);
-    length = (length > 125) ? 125 : length;
-
-    char argb[128];
-    argb[0] = length + 2;
-    argb[1] = ' ';
-    strncpy(argb + 2, cmdline, length);
-    argb[length + 2] = '\r';
+    LOG("entry, name: '%s', desc: %04X", name, desc);
 
     union _dosspawn_t spawn;
     memset(&spawn, 0, sizeof(spawn));
-    spawn._proc_run._argv = _CV_FP(argb);
 
+    // Save the parent PSP
+    unsigned parent = _get_psp();
+
+    // Load but don't execute
     int status;
-    if (0 != (status = _dos_spawn(0, name, &spawn)))
+    if (0 != (status = _dos_spawn(1, name, &spawn)))
     {
         LOG("cannot spawn!");
         status = -status;
         goto end;
     }
 
-    _dos_wait(&status);
-    if (0x0300 != (status & 0xFF00))
+    // Restore the parent PSP
+    unsigned child = _get_psp();
+    _set_psp(parent);
+
+    // Find the header
+    unsigned segment = FP_SEG(spawn._proc._csip), offset;
+    for (offset = 0; offset < FP_OFF(spawn._proc._csip); offset += 16)
     {
-        LOG("module did not stay resident!");
+        if (ANDREA_SIGNATURE == *(uint32_t far *)MK_FP(segment, offset))
+        {
+            break;
+        }
+    }
+
+    if (offset >= FP_OFF(spawn._proc._csip))
+    {
+        LOG("cannot find the signature!");
+        status = -ANDREA_ERROR_NO_EXPORTS;
         goto end;
     }
 
-    status &= 0xFF;
+    andrea_header far *header = (andrea_header far *)MK_FP(segment, offset);
+    desc->module = child;
+    desc->segment = segment;
+    desc->exports = offset + sizeof(andrea_header);
+    desc->strings = desc->exports + header->num_exports * sizeof(uint16_t);
+    desc->max_ordinal = header->num_exports - 1;
+    LOG("loaded, module: %04X, segment: %04X, exports: %04X, strings: %04X, "
+        "max_ordinal: %u",
+        desc->module, desc->segment, desc->exports, desc->strings,
+        desc->max_ordinal);
 
 end:
     LOG("exit, %d", status);
@@ -149,19 +166,16 @@ andrea_load(const char *name)
         return ANDREA_ERROR_TOO_MANY_MODULES;
     }
 
-    char ptrstr[9];
-    _serialize_pointer(ptrstr, desc);
-
     andrea_module module = 0;
-    if (ANDREA_SUCCESS != _load_module(name, ptrstr))
+    if (ANDREA_SUCCESS != _load_module(name, desc))
     {
         goto end;
     }
 
-    LOG("descriptor populated, module: %04X, segment: %04X, exports: %04X, "
-        "strings: %04X, max_ordinal: %u",
-        desc->module, desc->segment, desc->exports, desc->strings,
-        desc->max_ordinal);
+    if (0 == desc->module)
+    {
+        return ANDREA_ERROR_NO_EXPORTS;
+    }
 
     uint16_t far *exports = DESC_EXPORTS(desc);
     LOG("export table:");
