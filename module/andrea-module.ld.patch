@@ -1,6 +1,33 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-12 23:03:21.620108000 +0100
-@@ -297,6 +297,21 @@
++++ bin/andrea-module.ld	2024-03-16 18:32:14.763258900 +0100
+@@ -241,7 +241,7 @@
+ 		/* Header size in paragraphs.  */
+ 		SHORT (__msdos_mz_hdr_paras)
+ 		/* Minimum extra paragraphs.  */
+-		SHORT ((0x10000 - SIZEOF (.data) - ADDR (.data)) / 16)
++		SHORT ((__lbss0 + 15) / 16 + 1)
+ 		/* Maximum extra paragraphs.
+ 
+ 		   In the normal case, instead of setting this to 0xffff so
+@@ -256,12 +256,11 @@
+ 		   try to place our .exe at the top of conventional memory,
+ 		   which will crash everything).  -- tkchia  */
+ 		SHORT (DEFINED (__msdos_handle_v1) ? 0xffff
+-		    : (0x10000 - SIZEOF (.data) - ADDR (.data)) / 16)
+-		/* Initial %ss.  */
+-		SHORT (LOADADDR (.data) / 16 - __msdos_mz_hdr_paras
+-		    - ADDR (.data) / 16 + 0x10000)
+-		/* Initial %sp.  Let it wrap around from 0.  */
+-		SHORT (0)
++		    : ((__lbss0 + 15) / 16 + 1))
++		/* Initial %ss, just after the .bss section.  */
++		SHORT (LOADADDR (.bss) / 16 - ADDR (.bss) / 16)
++		/* Initial %sp. One paragraph is more than enough for an error message.  */
++		SHORT (0x10)
+ 		/* Checksum (unused).  */
+ 		SHORT (0)
+ 		/* Initial %cs:%ip.  */
+@@ -297,6 +296,21 @@
      /* Target text sections.  */
      .text : {
  		__stext = .;
