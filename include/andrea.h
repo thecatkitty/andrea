@@ -55,6 +55,16 @@ typedef union {
 #define ANDREA_IMPORT_FPTR(type, name, args)                                   \
     ((type far(*) args)__imp_##name.fptr)
 
+#define ANDREA_HEXPORTS andrea_hexport __andrea_hexports[] =
+#define ANDREA_HEXPORTS_END                                                    \
+    {                                                                          \
+        NULL, NULL                                                             \
+    }
+#define ANDREA_HEXPORT(name)                                                   \
+    {                                                                          \
+        #name, name                                                            \
+    }
+
 #define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
 
 #define ANDREA_SIGNATURE 0x61657226UL

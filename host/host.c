@@ -208,6 +208,33 @@ _from_name(module_desc *desc, const char far *name)
     return fptr;
 }
 
+static void far *
+_get_hexport(const char far *name)
+{
+    size_t length = _fstrlen(name) + 1;
+#ifdef ANDREA_LOGS_ENABLE
+    char *lname = (char *)alloca(length);
+    _fstrcpy(lname, name);
+    LOG("entry, name: %s", lname);
+#endif
+    void far *fptr = 0;
+
+    andrea_hexport far *hexport = __andrea_hexports;
+    while (NULL != hexport->name)
+    {
+        if (0 == _fmemcmp(hexport->name, name, length))
+        {
+            fptr = hexport->fptr;
+            break;
+        }
+
+        hexport++;
+    }
+
+    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
+    return fptr;
+}
+
 andrea_module
 andrea_load(const char *name)
 {
@@ -241,7 +268,13 @@ andrea_load(const char *name)
     LOG("import table:");
     for (int i = 0; i < desc->num_imports; i++)
     {
-        LOG("%3d: %04X", i, imports[i].desc.name);
+        const char far *import_name =
+            MK_FP(desc->segment, imports[i].desc.name);
+        void far *fptr = _get_hexport(import_name);
+
+        LOG("%3d: %04X -> %04X:%04X", i, imports[i].desc.name, FP_SEG(fptr),
+            FP_OFF(fptr));
+        imports[i].fptr = fptr;
     }
 
     module = desc->module;
