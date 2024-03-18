@@ -13,6 +13,7 @@ typedef uint16_t andrea_module;
 typedef struct
 {
     uint32_t signature;
+    uint16_t size;
     uint16_t num_exports;
 } andrea_header;
 
