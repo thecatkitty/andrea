@@ -15,6 +15,7 @@ typedef struct
     uint32_t signature;
     uint16_t size;
     uint16_t num_exports;
+    uint16_t size_expstrs;
 } andrea_header;
 
 #pragma pack(pop)
