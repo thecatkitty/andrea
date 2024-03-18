@@ -15,16 +15,45 @@ typedef struct
     uint32_t signature;
     uint16_t size;
     uint16_t num_exports;
+    uint16_t num_imports;
     uint16_t size_expstrs;
+    uint16_t size_impstrs;
 } andrea_header;
+
+// Host export table entry
+typedef struct
+{
+    const char *name;
+    void far   *fptr;
+} andrea_hexport;
+
+// Import table entry
+typedef union {
+    struct
+    {
+        uint16_t _reserved;
+        uint16_t name;
+    } desc;
+
+    void far *fptr;
+} andrea_import;
 
 #pragma pack(pop)
 
 #define ANDREA_EXPORT(name)                                                    \
-    __attribute__((section(".andrea.exports")))                                \
-    const uint16_t __exptbl_##name = FP_OFF(name);                             \
-    __attribute__((section(".andrea.strings"))) const char __expstr_##name[] = \
+    __attribute__((section(".andrea.exports"))) const uint16_t __exp_##name =  \
+        FP_OFF(name);                                                          \
+    __attribute__((section(".andrea.expstrs"))) const char __expstr_##name[] = \
         #name;
+
+#define ANDREA_IMPORT(name)                                                    \
+    __attribute__((weak)) __attribute__((section(".andrea.impstrs")))          \
+    const char __impstr_##name[] = #name;                                      \
+    __attribute__((weak)) __attribute__((section(".andrea.imports")))          \
+    andrea_import far __imp_##name = {{0, (unsigned)__impstr_##name}};
+
+#define ANDREA_IMPORT_FPTR(type, name, args)                                   \
+    ((type far(*) args)__imp_##name.fptr)
 
 #define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
 

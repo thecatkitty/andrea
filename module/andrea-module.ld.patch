@@ -1,5 +1,5 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-18 07:49:39.198274230 +0100
++++ bin/andrea-module.ld	2024-03-18 19:29:21.400156800 +0100
 @@ -241,7 +241,7 @@
  		/* Header size in paragraphs.  */
  		SHORT (__msdos_mz_hdr_paras)
@@ -27,7 +27,7 @@
  		/* Checksum (unused).  */
  		SHORT (0)
  		/* Initial %cs:%ip.  */
-@@ -297,6 +296,36 @@
+@@ -297,6 +296,52 @@
      /* Target text sections.  */
      .text : {
  		__stext = .;
@@ -45,8 +45,14 @@
 +		/* Export table length.  */
 +		SHORT ((__andrea_eexports - __andrea_sexports) / 2)
 +
++		/* Import table length.  */
++		SHORT ((__andrea_eimports - __andrea_simports) / 4)
++
 +		/* Export names size.  */
 +		SHORT (__andrea_eexpstrs - __andrea_sexpstrs)
++
++		/* Import names size.  */
++		SHORT (__andrea_eimpstrs - __andrea_simpstrs)
 +
 +		/* End of the header.  */
 +		HIDDEN (__andrea_ehdr = .);
@@ -56,10 +62,20 @@
 +		*(.andrea.exports)
 +		__andrea_eexports = .;
 +
++		/* Import table.  */
++		__andrea_simports = .;
++		*(.andrea.imports)
++		__andrea_eimports = .;
++
 +		/* Export strings.  */
 +		HIDDEN (__andrea_sexpstrs = .);
-+		*(.andrea.strings)
++		*(.andrea.expstrs)
 +		HIDDEN (__andrea_eexpstrs = .);
++
++		/* Import strings.  */
++		HIDDEN (__andrea_simpstrs = .);
++		*(.andrea.impstrs)
++		HIDDEN (__andrea_eimpstrs = .);
 +
  		*(.startupA)
  		*(.startupB)

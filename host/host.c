@@ -12,9 +12,14 @@ typedef struct
     andrea_module module;
     uint16_t      segment;
     uint16_t      exports;
-    uint16_t      strings;
-    uint16_t      max_ordinal;
+    uint16_t      imports;
+    uint16_t      expstrs;
+    uint16_t      impstrs;
+    uint16_t      num_exports;
+    uint16_t      num_imports;
 } module_desc;
+
+extern andrea_hexport __andrea_hexports[];
 
 static module_desc _modules[ANDREA_MAX_MODULES];
 
@@ -30,8 +35,14 @@ static module_desc _modules[ANDREA_MAX_MODULES];
 #define DESC_EXPORTS(desc)                                                     \
     ((uint16_t far *)MK_FP((desc)->segment, (desc)->exports))
 
-#define DESC_NAMES(desc)                                                       \
-    ((const char far *)MK_FP((desc)->segment, (desc)->strings))
+#define DESC_IMPORTS(desc)                                                     \
+    ((andrea_import far *)MK_FP((desc)->segment, (desc)->imports))
+
+#define DESC_EXPSTRS(desc)                                                     \
+    ((const char far *)MK_FP((desc)->segment, (desc)->expstrs))
+
+#define DESC_IMPSTRS(desc)                                                     \
+    ((const char far *)MK_FP((desc)->segment, (desc)->impstrs))
 
 static module_desc *
 _desc_from_module(andrea_module module)
@@ -114,12 +125,13 @@ _load_module(const char *name, module_desc *desc)
     desc->module = child;
     desc->segment = segment;
     desc->exports = offset + sizeof(andrea_header);
-    desc->strings = desc->exports + header->num_exports * sizeof(uint16_t);
-    desc->max_ordinal = header->num_exports - 1;
-    LOG("loaded, module: %04X, segment: %04X, exports: %04X, strings: %04X, "
-        "max_ordinal: %u",
-        desc->module, desc->segment, desc->exports, desc->strings,
-        desc->max_ordinal);
+    desc->imports = desc->exports + header->num_exports * sizeof(uint16_t);
+    desc->expstrs = desc->imports + header->num_imports * sizeof(andrea_import);
+    desc->impstrs = desc->expstrs + header->size_expstrs;
+    desc->num_exports = header->num_exports;
+    desc->num_imports = header->num_imports;
+    LOG("loaded, module: %04X, segment: %04X, exports: %u, imports: %u",
+        desc->module, desc->segment, header->num_exports, header->num_imports);
 
 end:
     LOG("exit, %d", status);
@@ -132,7 +144,7 @@ _from_ordinal(module_desc *desc, unsigned ordinal)
     LOG("entry, desc: %04X, ordinal: %u", desc, ordinal);
     void far *fptr = 0;
 
-    if (desc->max_ordinal < ordinal)
+    if (desc->num_exports <= ordinal)
     {
         LOG("ordinal too high!");
         goto end;
@@ -143,6 +155,35 @@ _from_ordinal(module_desc *desc, unsigned ordinal)
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
     return fptr;
+}
+
+static unsigned
+_find_name(const char far *names,
+           const char far *name,
+           size_t          length,
+           unsigned        limit)
+{
+#ifdef ANDREA_LOGS_ENABLE
+    char *lname = (char *)alloca(length);
+    _fmemcpy(lname, name, length);
+    LOG("entry, names: %04X:%04X, name: %s, length: %zu, limit: %u",
+        FP_SEG(names), FP_OFF(names), lname, length, limit);
+#endif
+
+    for (unsigned i = 0; i < limit; i++)
+    {
+        if (0 == _fmemcmp(names, name, length))
+        {
+            LOG("exit, %u", i);
+            return i;
+        }
+
+        while (*names++)
+            ;
+    }
+
+    LOG("exit, not found!");
+    return limit;
 }
 
 static void far *
@@ -156,20 +197,13 @@ _from_name(module_desc *desc, const char far *name)
 #endif
     void far *fptr = 0;
 
-    const char far *names = DESC_NAMES(desc);
-    for (unsigned i = 0; i <= desc->max_ordinal; i++)
+    unsigned ordinal =
+        _find_name(DESC_EXPSTRS(desc), name, length, desc->num_exports);
+    if (desc->num_exports != ordinal)
     {
-        if (0 == _fmemcmp(names, name, length))
-        {
-            fptr = _from_ordinal(desc, i);
-            break;
-        }
-
-        while (*names++)
-            ;
+        fptr = _from_ordinal(desc, ordinal);
     }
 
-end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
     return fptr;
 }
@@ -198,9 +232,16 @@ andrea_load(const char *name)
 
     uint16_t far *exports = DESC_EXPORTS(desc);
     LOG("export table:");
-    for (int i = 0; i <= desc->max_ordinal; i++)
+    for (int i = 0; i < desc->num_exports; i++)
     {
         LOG("%3d: %04X", i, exports[i]);
+    }
+
+    andrea_import far *imports = DESC_IMPORTS(desc);
+    LOG("import table:");
+    for (int i = 0; i < desc->num_imports; i++)
+    {
+        LOG("%3d: %04X", i, imports[i].desc.name);
     }
 
     module = desc->module;
@@ -272,14 +313,14 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
     while (offset != exports[ordinal])
     {
         ordinal++;
-        if (ordinal > desc->max_ordinal)
+        if (ordinal >= desc->num_exports)
         {
             LOG("procedure not found!");
             goto end;
         }
     }
 
-    const char far *names = DESC_NAMES(desc);
+    const char far *names = DESC_EXPSTRS(desc);
     for (unsigned i = 0; i < ordinal; i++)
     {
         while (*names++)
