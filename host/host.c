@@ -96,6 +96,7 @@ _load_module(const char *name, module_desc *desc)
     if (offset >= FP_OFF(spawn._proc._csip))
     {
         LOG("cannot find the signature!");
+        _dos_freemem(child);
         status = -ANDREA_ERROR_NO_EXPORTS;
         goto end;
     }
@@ -105,6 +106,7 @@ _load_module(const char *name, module_desc *desc)
     {
         LOG("invalid header size %u, expected %u!", header->size,
             sizeof(andrea_header));
+        _dos_freemem(child);
         status = -ANDREA_ERROR_PROTOCOL_MISMATCH;
         goto end;
     }
