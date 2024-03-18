@@ -90,5 +90,3 @@ main(int argc, char *argv[])
     puts("Host end");
     return 0;
 }
-
-ANDREA_HEXPORTS{ANDREA_HEXPORTS_END};

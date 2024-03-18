@@ -1,8 +1,9 @@
 $(BINDIR)/chost.exe: \
 		$(OBJDIR)/examples/chost.c.o \
+		$(OBJDIR)/examples/hexports.c.o \
 		$(BINDIR)/libandrea-host.a
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $< -L$(BINDIR) -landrea-host -li86
+	$(CC) $(LDFLAGS) -o $@ $^ -li86
 
 $(BINDIR)/cpphost.exe: \
 		$(OBJDIR)/examples/cpphost.cpp.o \
