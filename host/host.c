@@ -101,6 +101,14 @@ _load_module(const char *name, module_desc *desc)
     }
 
     andrea_header far *header = (andrea_header far *)MK_FP(segment, offset);
+    if (sizeof(andrea_header) != header->size)
+    {
+        LOG("invalid header size %u, expected %u!", header->size,
+            sizeof(andrea_header));
+        status = -ANDREA_ERROR_PROTOCOL_MISMATCH;
+        goto end;
+    }
+
     desc->module = child;
     desc->segment = segment;
     desc->exports = offset + sizeof(andrea_header);

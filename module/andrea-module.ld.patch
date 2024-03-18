@@ -1,5 +1,5 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-16 18:32:14.763258900 +0100
++++ bin/andrea-module.ld	2024-03-18 07:36:16.162286618 +0100
 @@ -241,7 +241,7 @@
  		/* Header size in paragraphs.  */
  		SHORT (__msdos_mz_hdr_paras)
@@ -27,23 +27,33 @@
  		/* Checksum (unused).  */
  		SHORT (0)
  		/* Initial %cs:%ip.  */
-@@ -297,6 +296,21 @@
+@@ -297,6 +296,31 @@
      /* Target text sections.  */
      .text : {
  		__stext = .;
 +
-+		/* Signature */
++
++		/* Andrea header.  */
++		HIDDEN (__andrea_shdr = .);
++
++		/* Signature.  */
 +		LONG (0x61657226)
 +
-+		/* Export table length */
++		/* Header size.  */
++		SHORT (__andrea_ehdr - __andrea_shdr)
++
++		/* Export table length.  */
 +		SHORT ((__andrea_eexports - __andrea_sexports) / 2)
 +
-+		/* Export table */
++		/* End of the header.  */
++		HIDDEN (__andrea_ehdr = .);
++
++		/* Export table.  */
 +		__andrea_sexports = .;
 +		*(.andrea.exports)
 +		__andrea_eexports = .;
 +
-+		/* Export strings */
++		/* Export strings.  */
 +		*(.andrea.strings)
 +
  		*(.startupA)
