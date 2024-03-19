@@ -1,13 +1,7 @@
-    .arch i8086,jumps
-    .code16
-    .intel_syntax noprefix
+#include <andrea/asm.inc>
 
 
-    .text
-
-
-    .global dos_putfs
-dos_putfs:
+GLOBAL_FUN(dos_putfs):
     /* Save the stack frame */
     push    bp
     mov     bp, sp

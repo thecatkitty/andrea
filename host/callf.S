@@ -1,17 +1,11 @@
-    .arch i8086,jumps
-    .code16
-    .intel_syntax noprefix
+#include <andrea/asm.inc>
 
 
 #define SAVE_RET(base) base + 0
 #define SAVE_BP(base)  base + 2
 
 
-    .text
-
-
-    .global  __andrea_callfw
-__andrea_callfw:
+GLOBAL_FUN(__andrea_callfw):
     pop     SAVE_RET(save)
     sub     sp, 2
 

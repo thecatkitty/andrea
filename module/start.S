@@ -1,12 +1,7 @@
-    .arch i8086,jumps
-    .code16
-    .intel_syntax noprefix
+#include <andrea/asm.inc>
 
-    .text
 
-    .global _start
-    .type   _start, @function
-_start:
+GLOBAL_FUN(_start):
     /* Tiny memory model, DS=CS */
     push    cs
     pop     ds
@@ -22,8 +17,3 @@ _start:
 
 .message:
     .ascii  "This is an Andrea loadable module.\r\n$"
-
-
-    .section .andrea.exports
-    .global  andrea_exptabl
-andrea_exptabl:
