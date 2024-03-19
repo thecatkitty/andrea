@@ -1,5 +1,6 @@
 CC = ia16-elf-gcc
 
+ASFLAGS  = -Iinclude
 CFLAGS   = -mcmodel=small -march=i8088 -Os -Iinclude
 CXXFLAGS = $(CFLAGS) -Iext/optional/include
 LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
@@ -39,7 +40,7 @@ $(OBJDIR)/%.cpp.o: %.cpp
 
 $(OBJDIR)/%.S.o: %.S
 	@mkdir -p $(@D)
-	$(CC) -c -o $@ $^
+	$(CC) -c $(ASFLAGS) -o $@ $^
 
 
 clean:
