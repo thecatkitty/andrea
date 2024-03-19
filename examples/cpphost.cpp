@@ -30,5 +30,3 @@ main(int argc, char *argv[])
 
     return 0;
 }
-
-uint16_t __andrea_hexports[] = {0, 0, 0, 0};
