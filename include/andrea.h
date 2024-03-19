@@ -52,8 +52,11 @@ typedef union {
     __attribute__((weak)) __attribute__((section(".andrea.imports")))          \
     andrea_import far __imp_##name = {{0, (unsigned)__impstr_##name}};
 
-#define ANDREA_IMPORT_FPTR(type, name, args)                                   \
-    ((type far(*) args)__imp_##name.fptr)
+#define ANDREA_EXTERN(type, name, args)                                        \
+    ({                                                                         \
+        extern andrea_import far __imp_##name;                                 \
+        ((type far(*) args)__imp_##name.fptr);                                 \
+    })
 
 #define ANDREA_HEXPORTS andrea_hexport __andrea_hexports[] =
 #define ANDREA_HEXPORTS_END                                                    \
