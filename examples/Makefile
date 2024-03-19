@@ -8,10 +8,12 @@ $(BINDIR)/chost.exe: \
 
 $(BINDIR)/cpphost.exe: \
 		$(OBJDIR)/examples/cpphost.cpp.o \
-		$(BINDIR)/libandrea-host.a \
-		$(BINDIR)/libandrea-host++.a
+		$(OBJDIR)/examples/exports/hexports.c.o \
+		$(OBJDIR)/examples/exports/dos_putfs.S.o \
+		$(BINDIR)/libandrea-host++.a \
+		$(BINDIR)/libandrea-host.a
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $< -L$(BINDIR) -landrea-host++ -landrea-host -li86 -lstdc++
+	$(CC) $(LDFLAGS) -o $@ $^ -li86 -lstdc++
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
