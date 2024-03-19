@@ -20,6 +20,7 @@ $(BINDIR)/module1.exe: \
 
 $(BINDIR)/module2.exe: \
 		$(MOD_START) \
-		$(OBJDIR)/examples/exports/hello.c.o
+		$(OBJDIR)/examples/exports/hello.c.o \
+		$(OBJDIR)/examples/exports/goodbye.c.o
 	@mkdir -p $(@D)
 	$(CC) $(MOD_LDFLAGS) -o $@ $^ -li86
