@@ -68,6 +68,8 @@ typedef union {
         #name, name                                                            \
     }
 
+#define ANDREA_MODDATA __attribute__((section(".andrea.moddata"))) far
+
 #define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
 
 #define ANDREA_SIGNATURE 0x61657226UL

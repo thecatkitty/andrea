@@ -1,5 +1,5 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-18 19:29:21.400156800 +0100
++++ bin/andrea-module.ld	2024-03-19 08:34:43.676817422 +0100
 @@ -241,7 +241,7 @@
  		/* Header size in paragraphs.  */
  		SHORT (__msdos_mz_hdr_paras)
@@ -80,3 +80,13 @@
  		*(.startupA)
  		*(.startupB)
  		*(.startupC)
+@@ -312,6 +357,9 @@
+ 		*(.fini)
+ 		*(.exitB)
+ 		*(.text) *(.text.*)
++
++		/* Module data (tiny-ish memory model).  */
++		*(.andrea.moddata)
+ 		__etext = .;
+ 
+ 		/* Make the data segments start on a paragraph boundary.  */
