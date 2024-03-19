@@ -1,6 +1,6 @@
 $(BINDIR)/chost.exe: \
 		$(OBJDIR)/examples/chost.c.o \
-		$(OBJDIR)/examples/hexports.c.o \
+		$(OBJDIR)/examples/exports/hexports.c.o \
 		$(BINDIR)/libandrea-host.a
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^ -li86
@@ -14,12 +14,12 @@ $(BINDIR)/cpphost.exe: \
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
-		$(OBJDIR)/examples/module1.c.o
+		$(OBJDIR)/examples/exports/square.c.o
 	@mkdir -p $(@D)
 	$(CC) $(MOD_LDFLAGS) -o $@ $^ -li86
 
 $(BINDIR)/module2.exe: \
 		$(MOD_START) \
-		$(OBJDIR)/examples/module2.c.o
+		$(OBJDIR)/examples/exports/hello.c.o
 	@mkdir -p $(@D)
 	$(CC) $(MOD_LDFLAGS) -o $@ $^ -li86
