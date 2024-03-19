@@ -1,6 +1,7 @@
 $(BINDIR)/chost.exe: \
 		$(OBJDIR)/examples/chost.c.o \
 		$(OBJDIR)/examples/exports/hexports.c.o \
+		$(OBJDIR)/examples/exports/dos_putfs.S.o \
 		$(BINDIR)/libandrea-host.a
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^ -li86
