@@ -1,7 +1,5 @@
 #include <alloca.h>
-#include <dos.h>
 #include <libi86/string.h>
-#include <stdlib.h>
 
 #include "host.h"
 
@@ -73,25 +71,6 @@ _from_name(module_desc *desc, const char far *name)
 
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
     return fptr;
-}
-
-void
-andrea_free(andrea_module module)
-{
-    LOG("entry, module: %04X", module);
-
-    module_desc *desc = moddesc_from_module(module);
-    if (NULL == desc)
-    {
-        LOG("exit, double free?");
-        return;
-    }
-
-    unsigned status = _dos_freemem(desc->module);
-    LOG("termination status: %04X", status);
-
-    desc->module = 0;
-    LOG("exit");
 }
 
 void far *
