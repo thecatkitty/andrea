@@ -36,7 +36,7 @@ _try_get_procedure(andrea_module module, const char far *name)
            FP_SEG(procedure), FP_OFF(procedure));
 
     char proc_name[32];
-    if (andrea_get_procedure_name(procedure, proc_name, sizeof(proc_name)))
+    if (andrea_get_name(procedure, proc_name, sizeof(proc_name)))
     {
         printf(" (%s)", proc_name);
     }
