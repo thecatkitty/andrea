@@ -1,19 +1,28 @@
+HEXPORTS_OBJS = \
+	$(OBJDIR)/examples/exports/hexports.c.o \
+	$(OBJDIR)/examples/exports/dos_putfs.S.o
+
+CHOST_OBJS = \
+	$(OBJDIR)/examples/chost.c.o \
+	$(HEXPORTS_OBJS)
+
+CPPHOST_OBJS = \
+	$(OBJDIR)/examples/cpphost.cpp.o \
+	$(HEXPORTS_OBJS)
+
+
 $(BINDIR)/chost.exe: \
-		$(OBJDIR)/examples/chost.c.o \
-		$(OBJDIR)/examples/exports/hexports.c.o \
-		$(OBJDIR)/examples/exports/dos_putfs.S.o \
+		$(CHOST_OBJS) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $^ -li86
+	$(CC) $(LDFLAGS) -o $@ $(CHOST_OBJS) -L$(BINDIR) -l$(HOSTLIB_NAME) -li86
 
 $(BINDIR)/cpphost.exe: \
-		$(OBJDIR)/examples/cpphost.cpp.o \
-		$(OBJDIR)/examples/exports/hexports.c.o \
-		$(OBJDIR)/examples/exports/dos_putfs.S.o \
+		$(CPPHOST_OBJS) \
 		$(CPPLIB_FILE) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $^ -li86 -lstdc++
+	$(CC) $(LDFLAGS) -o $@ $(CPPHOST_OBJS) -L$(BINDIR) -l$(CPPLIB_NAME) -l$(HOSTLIB_NAME) -li86 -lstdc++
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
