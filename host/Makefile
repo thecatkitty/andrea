@@ -4,6 +4,7 @@ endif
 
 $(BINDIR)/libandrea-host.a: \
 		$(OBJDIR)/host/host.c.o \
+		$(OBJDIR)/host/load.c.o \
 		$(HOST_LOGS)
 	@mkdir -p $(@D)
 	ar -rcs $@ $^
