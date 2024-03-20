@@ -74,8 +74,6 @@ typedef union {
 
 #define ANDREA_SIGNATURE 0x61657226UL
 
-#define ANDREA_MAX_MODULES 5
-
 typedef enum
 {
     ANDREA_SUCCESS = 0x00,
