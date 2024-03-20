@@ -2,7 +2,7 @@ $(BINDIR)/chost.exe: \
 		$(OBJDIR)/examples/chost.c.o \
 		$(OBJDIR)/examples/exports/hexports.c.o \
 		$(OBJDIR)/examples/exports/dos_putfs.S.o \
-		$(BINDIR)/libandrea-host.a
+		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^ -li86
 
@@ -10,8 +10,8 @@ $(BINDIR)/cpphost.exe: \
 		$(OBJDIR)/examples/cpphost.cpp.o \
 		$(OBJDIR)/examples/exports/hexports.c.o \
 		$(OBJDIR)/examples/exports/dos_putfs.S.o \
-		$(BINDIR)/libandrea-host++.a \
-		$(BINDIR)/libandrea-host.a
+		$(CPPLIB_FILE) \
+		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^ -li86 -lstdc++
 
