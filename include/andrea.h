@@ -94,7 +94,7 @@ extern void far *
 andrea_get_procedure(andrea_module module, const char far *name);
 
 extern size_t
-andrea_get_procedure_name(void far *procedure, char *buffer, size_t size);
+andrea_get_name(void far *procedure, char *buffer, size_t size);
 
 #ifdef ANDREA_LOGS_ENABLE
 
