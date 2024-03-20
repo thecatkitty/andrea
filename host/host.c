@@ -3,58 +3,11 @@
 #include <libi86/string.h>
 #include <stdlib.h>
 
-#include <andrea.h>
-
-typedef uint16_t far (*exit_callback)(void);
-
-typedef struct
-{
-    andrea_module module;
-    uint16_t      segment;
-    uint16_t      exports;
-    uint16_t      imports;
-    uint16_t      expstrs;
-    uint16_t      impstrs;
-    uint16_t      num_exports;
-    uint16_t      num_imports;
-} module_desc;
+#include "host.h"
 
 extern andrea_hexport __andrea_hexports[];
 
-static module_desc _modules[ANDREA_MAX_MODULES];
-
-#define FIND_DESC(property, value)                                             \
-    ({                                                                         \
-        module_desc *__ptr = _modules;                                         \
-        while ((__ptr < (_modules + ANDREA_MAX_MODULES)) &&                    \
-               (__ptr->property != (value)))                                   \
-            __ptr++;                                                           \
-        (__ptr == (_modules + ANDREA_MAX_MODULES)) ? NULL : __ptr;             \
-    })
-
-#define DESC_EXPORTS(desc)                                                     \
-    ((uint16_t far *)MK_FP((desc)->segment, (desc)->exports))
-
-#define DESC_IMPORTS(desc)                                                     \
-    ((andrea_import far *)MK_FP((desc)->segment, (desc)->imports))
-
-#define DESC_EXPSTRS(desc)                                                     \
-    ((const char far *)MK_FP((desc)->segment, (desc)->expstrs))
-
-#define DESC_IMPSTRS(desc)                                                     \
-    ((const char far *)MK_FP((desc)->segment, (desc)->impstrs))
-
-static module_desc *
-_desc_from_module(andrea_module module)
-{
-    return FIND_DESC(module, module);
-}
-
-static module_desc *
-_desc_from_segment(uint16_t segment)
-{
-    return FIND_DESC(segment, segment);
-}
+module_desc __andrea_mods[ANDREA_MAX_MODULES];
 
 static unsigned
 _get_psp(void)
@@ -150,7 +103,7 @@ _from_ordinal(module_desc *desc, unsigned ordinal)
         goto end;
     }
 
-    fptr = MK_FP(desc->segment, DESC_EXPORTS(desc)[ordinal]);
+    fptr = MK_FP(desc->segment, MODDESC_EXPORTS(desc)[ordinal]);
 
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
@@ -198,7 +151,7 @@ _from_name(module_desc *desc, const char far *name)
     void far *fptr = 0;
 
     unsigned ordinal =
-        _find_name(DESC_EXPSTRS(desc), name, length, desc->num_exports);
+        _find_name(MODDESC_EXPSTRS(desc), name, length, desc->num_exports);
     if (desc->num_exports != ordinal)
     {
         fptr = _from_ordinal(desc, ordinal);
@@ -240,7 +193,7 @@ andrea_load(const char *name)
 {
     LOG("entry, name: '%s'", name);
 
-    module_desc *desc = _desc_from_module(0);
+    module_desc *desc = moddesc_from_module(0);
     if (NULL == desc)
     {
         return ANDREA_ERROR_TOO_MANY_MODULES;
@@ -257,14 +210,14 @@ andrea_load(const char *name)
         return ANDREA_ERROR_NO_EXPORTS;
     }
 
-    uint16_t far *exports = DESC_EXPORTS(desc);
+    uint16_t far *exports = MODDESC_EXPORTS(desc);
     LOG("export table:");
     for (int i = 0; i < desc->num_exports; i++)
     {
         LOG("%3d: %04X", i, exports[i]);
     }
 
-    andrea_import far *imports = DESC_IMPORTS(desc);
+    andrea_import far *imports = MODDESC_IMPORTS(desc);
     LOG("import table:");
     for (int i = 0; i < desc->num_imports; i++)
     {
@@ -289,7 +242,7 @@ andrea_free(andrea_module module)
 {
     LOG("entry, module: %04X", module);
 
-    module_desc *desc = _desc_from_module(module);
+    module_desc *desc = moddesc_from_module(module);
     if (NULL == desc)
     {
         LOG("exit, double free?");
@@ -310,7 +263,7 @@ andrea_get_procedure(andrea_module module, const char far *name)
         FP_OFF(name));
     void far *fptr = 0;
 
-    module_desc *desc = _desc_from_module(module);
+    module_desc *desc = moddesc_from_module(module);
     if (NULL == desc)
     {
         LOG("not found!");
@@ -333,14 +286,14 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
     uint16_t module = FP_SEG(procedure), offset = FP_OFF(procedure);
 
     size_t       length = 0;
-    module_desc *desc = _desc_from_segment(FP_SEG(procedure));
+    module_desc *desc = moddesc_from_segment(FP_SEG(procedure));
     if (NULL == desc)
     {
         LOG("module not found!");
         goto end;
     }
 
-    uint16_t far *exports = DESC_EXPORTS(desc);
+    uint16_t far *exports = MODDESC_EXPORTS(desc);
 
     uint16_t ordinal = 0;
     while (offset != exports[ordinal])
@@ -353,7 +306,7 @@ andrea_get_procedure_name(void far *procedure, char *buffer, size_t size)
         }
     }
 
-    const char far *names = DESC_EXPSTRS(desc);
+    const char far *names = MODDESC_EXPSTRS(desc);
     for (unsigned i = 0; i < ordinal; i++)
     {
         while (*names++)
