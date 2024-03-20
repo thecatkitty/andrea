@@ -1,6 +1,14 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-19 08:34:43.676817422 +0100
-@@ -241,7 +241,7 @@
++++ bin/andrea-module.ld	2024-03-20 22:41:20.064022100 +0100
+@@ -6,6 +6,7 @@
+ 
+ OUTPUT_FORMAT(binary)
+ ENTRY(_start)
++INPUT(-l:andrea-modstart.a)
+ 
+ MEMORY
+   {
+@@ -241,7 +242,7 @@
  		/* Header size in paragraphs.  */
  		SHORT (__msdos_mz_hdr_paras)
  		/* Minimum extra paragraphs.  */
@@ -9,7 +17,7 @@
  		/* Maximum extra paragraphs.
  
  		   In the normal case, instead of setting this to 0xffff so
-@@ -256,12 +256,11 @@
+@@ -256,12 +257,11 @@
  		   try to place our .exe at the top of conventional memory,
  		   which will crash everything).  -- tkchia  */
  		SHORT (DEFINED (__msdos_handle_v1) ? 0xffff
@@ -27,7 +35,7 @@
  		/* Checksum (unused).  */
  		SHORT (0)
  		/* Initial %cs:%ip.  */
-@@ -297,6 +296,52 @@
+@@ -297,6 +297,52 @@
      /* Target text sections.  */
      .text : {
  		__stext = .;
@@ -80,7 +88,7 @@
  		*(.startupA)
  		*(.startupB)
  		*(.startupC)
-@@ -312,6 +357,9 @@
+@@ -312,6 +358,9 @@
  		*(.fini)
  		*(.exitB)
  		*(.text) *(.text.*)
