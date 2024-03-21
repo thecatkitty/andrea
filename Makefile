@@ -9,6 +9,9 @@ MOD_LD      = $(BINDIR)/andrea-module.ld
 MOD_LDFLAGS = $(LDFLAGS) -nostdlib -T $(MOD_LD)
 MOD_START   = $(BINDIR)/andrea-modstart.a
 
+HOST_LD      = $(BINDIR)/andrea-host.ld
+HOST_LDFLAGS = $(LDFLAGS) -nostdlib -T $(HOST_LD)
+
 BINDIR = bin
 OBJDIR = obj
 
