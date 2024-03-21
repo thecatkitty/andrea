@@ -15,24 +15,24 @@ $(BINDIR)/chost.exe: \
 		$(CHOST_OBJS) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $(CHOST_OBJS) -l$(HOSTLIB_NAME) -li86
+	$(CC) -o $@ $(CHOST_OBJS) $(HOST_LDFLAGS)
 
 $(BINDIR)/cpphost.exe: \
 		$(CPPHOST_OBJS) \
 		$(CPPLIB_FILE) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $(CPPHOST_OBJS) -l$(CPPLIB_NAME) -l$(HOSTLIB_NAME) -li86 -lstdc++
+	$(CC) -o $@ $(CPPHOST_OBJS) -l$(CPPLIB_NAME) $(HOST_LDFLAGS) -lstdc++
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
 		$(OBJDIR)/examples/exports/square.c.o
 	@mkdir -p $(@D)
-	$(CC) $(MOD_LDFLAGS) -o $@ $(filter %.o,$^) -li86
+	$(CC) -o $@ $(filter %.o,$^) $(MOD_LDFLAGS)
 
 $(BINDIR)/module2.exe: \
 		$(MOD_START) \
 		$(OBJDIR)/examples/exports/hello.c.o \
 		$(OBJDIR)/examples/exports/goodbye.c.o
 	@mkdir -p $(@D)
-	$(CC) $(MOD_LDFLAGS) -o $@ $(filter %.o,$^) -li86
+	$(CC) -o $@ $(filter %.o,$^) $(MOD_LDFLAGS)

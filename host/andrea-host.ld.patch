@@ -1,0 +1,20 @@
+--- /usr/ia16-elf/lib/dos-mssl.ld	2024-02-18 23:02:32.000000000 +0100
++++ bin/andrea-host.ld	2024-03-21 18:06:03.688158195 +0100
+@@ -7,6 +7,7 @@
+ OUTPUT_FORMAT(binary)
+ ENTRY(_start)
+ INPUT(-l:crtbegin.o -l:crtend.o -l:dos-s-c0.o)
++GROUP(-landrea -lastdio -lfstdio -li86)
+ GROUP(-lc -lgcc -ldos-s -lm)
+ 
+ MEMORY
+@@ -299,6 +300,9 @@
+     /* Target text sections.  */
+     .text : {
+ 		__stext = .;
++
++		INCLUDE ../include/andrea/header.ld
++
+ 		*(.startupA)
+ 		*(.startupB)
+ 		*(.startupC)
