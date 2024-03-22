@@ -48,3 +48,11 @@ moddesc_from_segment(uint16_t segment)
 {
     return MODDESC_FIND(segment, segment);
 }
+
+extern andrea_header far *
+__andrea_find_header(unsigned segment, unsigned limit);
+
+extern void
+__andrea_fill_moddesc(module_desc       *desc,
+                      andrea_module      module,
+                      andrea_header far *header);
