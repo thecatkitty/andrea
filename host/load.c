@@ -126,15 +126,25 @@ andrea_load(const char *name)
     andrea_module module = 0;
     if (ANDREA_SUCCESS != _load_module(name, desc))
     {
+        LOG("cannot load module %s!", name);
         goto end;
     }
 
-    uint16_t far *exports = MODDESC_EXPORTS(desc);
+#ifdef ANDREA_LOGS_ENABLE
+    uint16_t far   *exports = MODDESC_EXPORTS(desc);
+    const char far *expstrs = MODDESC_EXPSTRS(desc);
     LOG("export table:");
     for (int i = 0; i < desc->num_exports; i++)
     {
-        LOG("%3d: %04X", i, exports[i]);
+        size_t length = _fstrlen(expstrs) + 1;
+        char  *lname = (char *)alloca(length);
+        _fmemcpy(lname, expstrs, length);
+
+        LOG("%3d: %04X %s", i, exports[i], lname);
+        while (*expstrs++)
+            ;
     }
+#endif
 
     andrea_import far *imports = MODDESC_IMPORTS(desc);
     LOG("import table:");
