@@ -174,6 +174,13 @@ andrea_load(const char *name)
     module = desc->module;
 
 end:
+    if ((0 == module) && (0 != desc->module))
+    {
+        LOG("cleaning up the failed load");
+        _dos_freemem(desc->module);
+        desc->module = 0;
+    }
+
     LOG("exit, %04X", module);
     return module;
 }
