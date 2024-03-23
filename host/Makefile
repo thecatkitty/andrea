@@ -6,6 +6,7 @@ ifdef LOGS
 endif
 
 $(HOSTLIB_FILE): \
+		$(OBJDIR)/host/init.c.o \
 		$(OBJDIR)/host/load.c.o \
 		$(OBJDIR)/host/free.c.o \
 		$(OBJDIR)/host/get_procedure.c.o \

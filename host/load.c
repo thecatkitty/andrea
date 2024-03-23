@@ -4,8 +4,6 @@
 
 #include "host.h"
 
-extern andrea_hexport __andrea_hexports[];
-
 module_desc __andrea_mods[ANDREA_MAX_MODULES];
 
 static unsigned
@@ -20,33 +18,6 @@ static void
 _set_psp(unsigned psp)
 {
     __asm volatile("int $0x21" : : "a"(0x5000), "b"(psp) : "cc", "memory");
-}
-
-static void far *
-_get_hexport(const char far *name)
-{
-    size_t length = _fstrlen(name) + 1;
-#ifdef ANDREA_LOGS_ENABLE
-    char *lname = (char *)alloca(length);
-    _fstrcpy(lname, name);
-    LOG("entry, name: %s", lname);
-#endif
-    void far *fptr = 0;
-
-    andrea_hexport far *hexport = __andrea_hexports;
-    while (NULL != hexport->name)
-    {
-        if (0 == _fmemcmp(hexport->name, name, length))
-        {
-            fptr = hexport->fptr;
-            break;
-        }
-
-        hexport++;
-    }
-
-    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
-    return fptr;
 }
 
 static int
@@ -176,7 +147,8 @@ andrea_load(const char *name)
     {
         const char far *import_name =
             MK_FP(desc->segment, imports[i].desc.name);
-        void far *fptr = _get_hexport(import_name);
+        void far *fptr =
+            andrea_get_procedure(__andrea_mods[0].module, import_name);
 
         LOG("%3d: %04X -> %04X:%04X", i, imports[i].desc.name, FP_SEG(fptr),
             FP_OFF(fptr));

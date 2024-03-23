@@ -5,6 +5,9 @@
 
 #include <tl/optional.hpp>
 
+extern "C" void
+andrea_init(void);
+
 class andrea_module
 {
     uint16_t _handle;

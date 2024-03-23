@@ -65,6 +65,7 @@ int
 main(int argc, char *argv[])
 {
     puts("Host start");
+    andrea_init();
 
     andrea_module module1;
     TRY_STEP(module1, _try_load_module("module1.exe"));
