@@ -6,6 +6,8 @@
 int
 main(int argc, char *argv[])
 {
+    andrea_init();
+
     auto module1 = andrea_module::open("module1.exe");
     if (!module1.has_value())
     {

@@ -20,13 +20,6 @@ typedef struct
     uint16_t size_impstrs;
 } andrea_header;
 
-// Host export table entry
-typedef struct
-{
-    const char *name;
-    void far   *fptr;
-} andrea_hexport;
-
 // Import table entry
 typedef union {
     struct
@@ -58,16 +51,6 @@ typedef union {
         ((type far(*) args)__imp_##name.fptr);                                 \
     })
 
-#define ANDREA_HEXPORTS andrea_hexport __andrea_hexports[] =
-#define ANDREA_HEXPORTS_END                                                    \
-    {                                                                          \
-        NULL, NULL                                                             \
-    }
-#define ANDREA_HEXPORT(name)                                                   \
-    {                                                                          \
-        #name, name                                                            \
-    }
-
 #define ANDREA_MODDATA __attribute__((section(".andrea.moddata"))) far
 
 #define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
@@ -83,6 +66,9 @@ typedef enum
     ANDREA_ERROR_NO_EXPORTS = 0x83,
     ANDREA_ERROR_PROTOCOL_MISMATCH = 0x84,
 } andrea_status;
+
+extern void
+andrea_init(void);
 
 extern andrea_module
 andrea_load(const char *name);
