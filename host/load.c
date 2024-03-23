@@ -129,11 +129,6 @@ andrea_load(const char *name)
         goto end;
     }
 
-    if (0 == desc->module)
-    {
-        return ANDREA_ERROR_NO_EXPORTS;
-    }
-
     uint16_t far *exports = MODDESC_EXPORTS(desc);
     LOG("export table:");
     for (int i = 0; i < desc->num_exports; i++)
@@ -147,11 +142,22 @@ andrea_load(const char *name)
     {
         const char far *import_name =
             MK_FP(desc->segment, imports[i].desc.name);
+#ifdef ANDREA_LOGS_ENABLE
+        size_t length = _fstrlen(import_name) + 1;
+        char  *lname = (char *)alloca(length);
+        _fmemcpy(lname, import_name, length);
+#endif
+
         void far *fptr =
             andrea_get_procedure(__andrea_mods[0].module, import_name);
+        LOG("%3d: %s -> %04X:%04X", i, lname, FP_SEG(fptr), FP_OFF(fptr));
+        if (NULL == fptr)
+        {
+            LOG("cannot locate the %s procedure entry point in the host!",
+                lname);
+            goto end;
+        }
 
-        LOG("%3d: %04X -> %04X:%04X", i, imports[i].desc.name, FP_SEG(fptr),
-            FP_OFF(fptr));
         imports[i].fptr = fptr;
     }
 
