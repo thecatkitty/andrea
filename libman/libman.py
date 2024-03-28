@@ -1,10 +1,12 @@
+#!/usr/bin/python3
+
 import os
 import subprocess
 
 from argparse import ArgumentParser
 from io import IOBase
 from tempfile import TemporaryDirectory
-from sys import stdout
+from sys import stderr, stdout
 
 from andrea import AssemblyGenerator, Module
 
@@ -14,20 +16,16 @@ BINARY_FORMATS = ["lib"]
 FORMATS = TEXT_FORMATS + BINARY_FORMATS
 
 
-parser = ArgumentParser()
+parser = ArgumentParser(
+    prog="libman.py",
+    description="Andrea utility for import library management",
+    epilog="Copyright (c) Mateusz Karcz, 2024. Shared under the MIT License.")
 parser.add_argument("module", help="name of the module file")
 parser.add_argument("-o", dest="output",
                     help="name of the output file", default="--")
 parser.add_argument("-f", dest="format",
                     help="format of the output data", choices=FORMATS)
 args = parser.parse_args()
-
-base = os.path.basename(args.output)
-format = args.format if args.format is not None else "asm" if base.endswith(
-    (".asm", ".s", ".S")) else "lib" if base.endswith(".a") else "text"
-output = stdout if args.output == "--" else open(
-    args.output, "w" if format in TEXT_FORMATS else "wb")
-module = Module.from_file(args.module)
 
 
 def to_text(module: Module, output: IOBase):
@@ -88,6 +86,17 @@ def to_lib(module: Module, output: str):
     tmpdir.cleanup()
 
 
+try:
+    base = os.path.basename(args.output)
+    format = args.format if args.format is not None else "asm" if base.endswith(
+        (".asm", ".s", ".S")) else "lib" if base.endswith(".a") else "text"
+    output = stdout if args.output == "--" else open(
+        args.output, "w" if format in TEXT_FORMATS else "wb")
+    module = Module.from_file(args.module)
+except ValueError as ve:
+    print(f"{parser.prog}: error: {ve}")
+    exit(1)
+
 if format == "text":
     to_text(module, output)
 
@@ -96,8 +105,13 @@ elif format == "asm":
 
 elif format == "lib":
     if output == stdout:
-        raise ValueError("Cannot write a library to STDOUT")
+        print(f"{parser.prog}: error: cannot write a library to STDOUT", file=stderr)
+        exit(1)
 
     output.close()
     os.remove(args.output)
-    to_lib(module, args.output)
+
+    try:
+        to_lib(module, args.output)
+    except subprocess.CalledProcessError as cpe:
+        print(f"{parser.prog}: error: {cpe}", file=stderr)
