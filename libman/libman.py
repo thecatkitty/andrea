@@ -3,7 +3,7 @@ from io import IOBase
 from os.path import basename
 from sys import stdout
 
-from andrea.module import Module
+from andrea import AssemblyGenerator, Module
 
 
 TEXT_FORMATS = ["text", "asm"]
@@ -44,28 +44,19 @@ def to_text(module: Module, output: IOBase):
 
 
 def to_asm(module: Module, output: IOBase):
-    print(".code16", file=output)
-    print(".intel_syntax noprefix", file=output)
-    print(file=output)
+    generator = AssemblyGenerator(module)
+    print(generator.emit_prolog(), file=output)
 
-    for name, _ in module.exports:
-        print(f".global {name}", file=output)
-        print(f"{name}: ljmp [cs:__imp_{name}]", file=output)
-    print(file=output)
+    for chunk in generator.emit_text():
+        print(chunk, file=output)
 
     print(".section .andrea.imports", file=output)
-    for name, _ in module.exports:
-        print(f"__imp_{name}:", file=output)
-        print(f".global __imp_{name}", file=output)
-        print(f"__imp_{name}:", file=output)
-        print(f".word 0", file=output)
-        print(f".word __impstr_{name}", file=output)
-    print(file=output)
+    for chunk in generator.emit_imports():
+        print(chunk, file=output)
 
     print(".section .andrea.impstrs", file=output)
-    for name, _ in module.exports:
-        print(f"__impstr_{name}: .asciz \"{name}\"", file=output)
-    print(file=output)
+    for chunk in generator.emit_impstrs():
+        print(chunk, file=output)
 
 
 if format == "text":
