@@ -1,8 +1,6 @@
-#include <andrea.h>
+#include "hexports.h"
 
 static char ANDREA_MODDATA _goodbye[] = "Goodbye World!\r\n$";
-
-#define dos_putfs ANDREA_EXTERN(void, dos_putfs, (const char far *))
 
 void far
 goodbye(void)

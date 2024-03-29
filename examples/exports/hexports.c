@@ -1,6 +1,3 @@
-#include <andrea.h>
-
-extern void far
-dos_putfs();
+#include "hexports.h"
 
 ANDREA_EXPORT(dos_putfs);
