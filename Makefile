@@ -3,16 +3,17 @@ CC = ia16-elf-gcc
 ASFLAGS  = -Iinclude
 CFLAGS   = -mcmodel=small -march=i8088 -Os -Iinclude
 CXXFLAGS = $(CFLAGS) -Iext/optional/include
-LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(BINDIR)
+LDFLAGS  = -mcmodel=small -march=i8088 -Xlinker -Map=$@.map -L$(LIBDIR)
 
-MOD_LD      = $(BINDIR)/andrea-module.ld
+MOD_LD      = $(LIBDIR)/andrea-module.ld
 MOD_LDFLAGS = $(LDFLAGS) -nostdlib -T $(MOD_LD)
-MOD_START   = $(BINDIR)/andrea-modstart.a
+MOD_START   = $(LIBDIR)/andrea-modstart.a
 
-HOST_LD      = $(BINDIR)/andrea-host.ld
+HOST_LD      = $(LIBDIR)/andrea-host.ld
 HOST_LDFLAGS = $(LDFLAGS) -nostdlib -T $(HOST_LD)
 
 BINDIR = bin
+LIBDIR = lib
 OBJDIR = obj
 
 
@@ -48,5 +49,4 @@ $(OBJDIR)/%.S.o: %.S
 
 
 clean:
-	rm -rf $(BINDIR)
-	rm -rf $(OBJDIR)
+	rm -rf $(BINDIR) $(LIBDIR) $(OBJDIR)

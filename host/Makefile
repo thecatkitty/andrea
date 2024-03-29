@@ -1,5 +1,5 @@
 HOSTLIB_NAME = andrea
-HOSTLIB_FILE = $(BINDIR)/lib$(HOSTLIB_NAME).a
+HOSTLIB_FILE = $(LIBDIR)/lib$(HOSTLIB_NAME).a
 
 ifdef LOGS
 	HOST_LOGS = $(OBJDIR)/host/log.c.o

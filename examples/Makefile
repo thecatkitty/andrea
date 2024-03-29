@@ -32,12 +32,12 @@ $(BINDIR)/module1.exe: \
 
 $(BINDIR)/module2.exe: \
 		$(MOD_START) \
-		$(BINDIR)/libchost.exe.a \
+		$(LIBDIR)/libchost.exe.a \
 		$(OBJDIR)/examples/exports/hello.c.o \
 		$(OBJDIR)/examples/exports/goodbye.c.o
 	@mkdir -p $(@D)
 	$(CC) -o $@ $(filter %.o,$^) $(MOD_LDFLAGS) -lchost.exe
 
 
-$(BINDIR)/lib%.exe.a: $(BINDIR)/%.exe
+$(LIBDIR)/lib%.exe.a: $(BINDIR)/%.exe
 	libman/libman.py $< -o $@
