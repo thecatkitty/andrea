@@ -1,4 +1,4 @@
-# Andrea [Build status badge](https://github.com/thecatkitty/andrea/actions/workflows/build.yml/badge.svg?event=push)
+# Andrea ![Build status badge](https://github.com/thecatkitty/andrea/actions/workflows/build.yml/badge.svg?event=push)
 **Atrociously Nonsensical Dynamic Resource Executable Allocator (Andrea)** is a library for DOS 2.0+ and GCC-IA16 that enables the developer to modularize their DOS applications by introducing infrastructure for loadable modules with exported and imported subroutines.
 
 This is still work in progress, but I'm doing my best to separate working version (`main` branch) from progressing code (PRs).
