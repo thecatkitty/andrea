@@ -26,16 +26,22 @@ jobs:
       - name: Build for release
         run: |
           make clean && make
-          mkdir release
+          mkdir -p release/lib common/lib
           mv bin release/
-          mv lib release/
+          mv lib/*.exe.a release/bin/
+          mv lib/libandrea* release/lib/
+          cp -r include common/
+          mv lib/*.ld common/lib/
+          mv lib/andrea-modstart.a common/lib/
 
       - name: Build for debug
         run: |
           make clean && make LOGS=1
-          mkdir debug
+          mkdir -p debug/lib
           mv bin debug/
-          mv lib debug/
+          mv lib/*.exe.a debug/bin/
+          mv lib/libandrea* debug/lib/
+          rm -rf libman/andrea/__pycache__
 
       - name: Prepare release info
         if: startsWith(github.ref, 'refs/tags/')
@@ -47,6 +53,7 @@ jobs:
         with:
           name: andrea
           path: |
+            common
             release
             debug
             libman
@@ -65,11 +72,23 @@ jobs:
           
       - name: Prepare archive
         run: |
-          zip -r andrea-${{ github.ref_name }}.zip release debug libman
+          rm -rf release/bin debug/bin
+          cp -r common/* release/
+          cp -r libman release/
+          cd release
+          zip -r ../andrea-${{ github.ref_name }}.zip lib libman include
+          cd ..
+          cp -r common/* debug/
+          cp -r libman debug/
+          cd debug
+          zip -r ../andrea-${{ github.ref_name }}-debug.zip lib libman include
+          cd ..
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: Version ${{ github.ref_name }}
           body_path: bin/RELEASE.md
-          files: andrea-${{ github.ref_name }}.zip
+          files: |
+            andrea-${{ github.ref_name }}.zip
+            andrea-${{ github.ref_name }}-debug.zip
