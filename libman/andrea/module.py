@@ -18,7 +18,7 @@ class Module(object):
                 self.format = signature
 
         offset = 0x10 * mz.e_cparhdr
-        while offset < mz.e_ip:
+        while offset < 4096:
             file.seek(offset)
             signature_bytes = file.read(sizeof(c_uint32))
             signature = c_uint32.from_buffer_copy(signature_bytes)
@@ -26,7 +26,7 @@ class Module(object):
                 break
             offset += 0x10
 
-        if offset >= mz.e_ip:
+        if offset >= 4096:
             raise ValueError("Andrea header not found")
 
         file.seek(offset)
