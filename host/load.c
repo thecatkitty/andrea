@@ -20,6 +20,12 @@ _set_psp(unsigned psp)
     __asm volatile("int $0x21" : : "a"(0x5000), "b"(psp) : "cc", "memory");
 }
 
+static unsigned
+_get_env(unsigned psp)
+{
+    return *(far uint16_t *)MK_FP(psp, 0x2C);
+}
+
 static int
 _load_module(const char *name, module_desc *desc)
 {
@@ -43,6 +49,9 @@ _load_module(const char *name, module_desc *desc)
     // Restore the parent PSP
     unsigned child = _get_psp();
     _set_psp(parent);
+
+    // Free the environment block
+    _dos_freemem(_get_env(child));
 
     // Find the header
     andrea_header far *header = __andrea_find_header(FP_SEG(spawn._proc._csip),
