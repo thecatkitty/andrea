@@ -6,23 +6,12 @@ CHOST_OBJS = \
 	$(OBJDIR)/examples/chost.c.o \
 	$(HEXPORTS_OBJS)
 
-CPPHOST_OBJS = \
-	$(OBJDIR)/examples/cpphost.cpp.o \
-	$(HEXPORTS_OBJS)
-
 
 $(BINDIR)/chost.exe: \
 		$(CHOST_OBJS) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
 	$(CC) -o $@ $(CHOST_OBJS) $(HOST_LDFLAGS)
-
-$(BINDIR)/cpphost.exe: \
-		$(CPPHOST_OBJS) \
-		$(CPPLIB_FILE) \
-		$(HOSTLIB_FILE)
-	@mkdir -p $(@D)
-	$(CC) -o $@ $(CPPHOST_OBJS) -l$(CPPLIB_NAME) $(HOST_LDFLAGS) -lstdc++
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
