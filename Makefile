@@ -23,7 +23,7 @@ endif
 
 
 build: \
-	$(BINDIR)/chost.exe \
+	$(BINDIR)/host.exe \
 	$(BINDIR)/module1.exe \
 	$(BINDIR)/module2.exe
 
