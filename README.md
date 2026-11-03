@@ -10,8 +10,6 @@ This is still work in progress, but I'm doing my best to separate working versio
   * by an ordinal number
 * retrieval of procedure exported name from its address using `andrea_get_name`
 * automatic importing of procedures exported to modules by the host
-* basic C++ host support
-  * currently non-reentrant - calls to `andrea_farproc::operator()` cannot be nested
 * verbose logging build for debugging purposes
 * Python utility (`libman.py`) for generating import libraries
   * currently only for host exports
@@ -31,7 +29,6 @@ make LOGS=1
 
 ## Using the library
 If you're building an application that loads modules, you need to use the generated `andrea-host.ld` linker script.
-If you wish to use the `andrea_module` C++ class, inclusion of `libandrea++` is also necessary.
 
 If you're building a module, you need to use the generated `andrea-module.ld` linker script.
 
