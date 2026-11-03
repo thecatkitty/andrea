@@ -24,7 +24,6 @@ endif
 
 build: \
 	$(BINDIR)/chost.exe \
-	$(BINDIR)/cpphost.exe \
 	$(BINDIR)/module1.exe \
 	$(BINDIR)/module2.exe
 
