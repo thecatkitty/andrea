@@ -2,16 +2,16 @@ HEXPORTS_OBJS = \
 	$(OBJDIR)/examples/exports/hexports.c.o \
 	$(OBJDIR)/examples/exports/dos_putfs.S.o
 
-CHOST_OBJS = \
-	$(OBJDIR)/examples/chost.c.o \
+HOST_OBJS = \
+	$(OBJDIR)/examples/host.c.o \
 	$(HEXPORTS_OBJS)
 
 
-$(BINDIR)/chost.exe: \
-		$(CHOST_OBJS) \
+$(BINDIR)/host.exe: \
+		$(HOST_OBJS) \
 		$(HOSTLIB_FILE)
 	@mkdir -p $(@D)
-	$(CC) -o $@ $(CHOST_OBJS) $(HOST_LDFLAGS)
+	$(CC) -o $@ $(HOST_OBJS) $(HOST_LDFLAGS)
 
 $(BINDIR)/module1.exe: \
 		$(MOD_START) \
@@ -21,11 +21,11 @@ $(BINDIR)/module1.exe: \
 
 $(BINDIR)/module2.exe: \
 		$(MOD_START) \
-		$(LIBDIR)/libchost.exe.a \
+		$(LIBDIR)/libhost.exe.a \
 		$(OBJDIR)/examples/exports/hello.c.o \
 		$(OBJDIR)/examples/exports/goodbye.c.o
 	@mkdir -p $(@D)
-	$(CC) -o $@ $(filter %.o,$^) $(MOD_LDFLAGS) -lchost.exe
+	$(CC) -o $@ $(filter %.o,$^) $(MOD_LDFLAGS) -lhost.exe
 
 
 $(LIBDIR)/lib%.exe.a: $(BINDIR)/%.exe
