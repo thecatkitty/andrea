@@ -32,15 +32,8 @@ _try_get_procedure(andrea_module module, const char far *name)
         goto end;
     }
 
-    printf("Got procedure %04X:%04X: %04X:%04X", FP_SEG(name), FP_OFF(name),
+    printf("Got procedure %04X:%04X: %04X:%04X\n", FP_SEG(name), FP_OFF(name),
            FP_SEG(procedure), FP_OFF(procedure));
-
-    char proc_name[32];
-    if (andrea_get_name(procedure, proc_name, sizeof(proc_name)))
-    {
-        printf(" (%s)", proc_name);
-    }
-    puts("");
 
 end:
     return procedure;
