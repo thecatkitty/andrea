@@ -8,7 +8,6 @@ This is still work in progress, but I'm doing my best to separate working versio
 * manual retrieval of procedures from a module using `andrea_get_procedure`
   * by an exported name
   * by an ordinal number
-* retrieval of procedure exported name from its address using `andrea_get_name`
 * automatic importing of procedures exported to modules by the host
 * verbose logging build for debugging purposes
 * Python utility (`libman.py`) for generating import libraries
