@@ -7,7 +7,6 @@ This is still work in progress, but I'm doing my best to separate working versio
 * manual loading of modules using `andrea_load` and `andrea_free`
 * manual retrieval of procedures from a module using `andrea_get_procedure`
   * by an exported name
-  * by an ordinal number
 * automatic importing of procedures exported to modules by the host
 * verbose logging build for debugging purposes
 * Python utility (`libman.py`) for generating import libraries

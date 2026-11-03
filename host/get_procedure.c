@@ -3,25 +3,6 @@
 
 #include "host.h"
 
-static void far *
-_from_ordinal(module_desc *desc, unsigned ordinal)
-{
-    LOG("entry, desc: %04X, ordinal: %u", desc, ordinal);
-    void far *fptr = 0;
-
-    if (desc->num_exports <= ordinal)
-    {
-        LOG("ordinal too high!");
-        goto end;
-    }
-
-    fptr = MK_FP(desc->segment, MODDESC_EXPORTS(desc)[ordinal]);
-
-end:
-    LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
-    return fptr;
-}
-
 static unsigned
 _find_name(const char far *names,
            const char far *name,
@@ -52,7 +33,7 @@ _find_name(const char far *names,
 }
 
 static void far *
-_from_name(module_desc *desc, const char far *name)
+_find_procedure(module_desc *desc, const char far *name)
 {
     size_t length = _fstrlen(name) + 1;
 #ifdef ANDREA_LOGS_ENABLE
@@ -66,7 +47,7 @@ _from_name(module_desc *desc, const char far *name)
         _find_name(MODDESC_EXPSTRS(desc), name, length, desc->num_exports);
     if (desc->num_exports != ordinal)
     {
-        fptr = _from_ordinal(desc, ordinal);
+        fptr = MK_FP(desc->segment, MODDESC_EXPORTS(desc)[ordinal]);
     }
 
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));
@@ -87,8 +68,7 @@ andrea_get_procedure(andrea_module module, const char far *name)
         goto end;
     }
 
-    fptr = FP_SEG(name) ? _from_name(desc, name)
-                        : _from_ordinal(desc, FP_OFF(name));
+    fptr = _find_procedure(desc, name);
 
 end:
     LOG("exit, %04X:%04X", FP_SEG(fptr), FP_OFF(fptr));

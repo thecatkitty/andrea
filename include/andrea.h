@@ -85,13 +85,6 @@ typedef union {
 #define ANDREA_MODDATA __attribute__((section(".andrea.moddata"))) far
 
 ///
-/// Converts a number into an argument of `andrea_get_procedure(...)`.
-///
-/// @param ordinal Ordinal number of the requested procedure.
-///
-#define ANDREA_ORDINAL(ordinal) ((const char far *)(ordinal))
-
-///
 /// Signature of any Andrea module - `&rea` in little endian.
 ///
 #define ANDREA_SIGNATURE 0x61657226UL
@@ -137,7 +130,7 @@ andrea_free(andrea_module module);
 /// Retrieves a procedure exported by an Andrea module.
 ///
 /// @param module Handle to the loaded module.
-/// @param name Name of the requested procedure, or `ANDREA_ORDINAL(...)`.
+/// @param name Name of the requested procedure.
 ///
 /// @return Far pointer to the procedure, NULL on error.
 ///
