@@ -1,3 +1,0 @@
-[submodule "ext/optional"]
-	path = ext/optional
-	url = https://github.com/TartanLlama/optional.git
