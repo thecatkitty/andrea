@@ -29,7 +29,6 @@ build: \
 
 
 include host/Makefile
-include host++/Makefile
 include module/Makefile
 include examples/Makefile
 
