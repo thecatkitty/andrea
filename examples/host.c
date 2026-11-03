@@ -67,8 +67,7 @@ main(int argc, char *argv[])
     TRY_STEP(module2, _try_load_module("module2.exe"));
 
     lpfnsquare square;
-    TRY_STEP(square,
-             (lpfnsquare)_try_get_procedure(module1, ANDREA_ORDINAL(0)));
+    TRY_STEP(square, (lpfnsquare)_try_get_procedure(module1, "square"));
 
     STEP("Call square", printf("42 squared is %d\n", square(42)));
 
