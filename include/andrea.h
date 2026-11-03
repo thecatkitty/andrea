@@ -144,20 +144,6 @@ andrea_free(andrea_module module);
 extern void far *
 andrea_get_procedure(andrea_module module, const char far *name);
 
-///
-/// Retrieves the name of an imported procedure.
-///
-/// @param procedure Far pointer to the procedure.
-/// @param buffer Output buffer for the retrieved name.
-/// @param size Total size of the buffer.
-///
-/// @return Length of the name, 0 if not found, 1 if anonymous.
-///         If the length is greater than the size of the buffer, only a null
-///         character is written.
-///
-extern size_t
-andrea_get_name(void far *procedure, char *buffer, size_t size);
-
 #ifdef ANDREA_LOGS_ENABLE
 
 ///

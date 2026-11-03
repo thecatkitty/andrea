@@ -10,7 +10,6 @@ $(HOSTLIB_FILE): \
 		$(OBJDIR)/host/load.c.o \
 		$(OBJDIR)/host/free.c.o \
 		$(OBJDIR)/host/get_procedure.c.o \
-		$(OBJDIR)/host/get_name.c.o \
 		$(HOST_LOGS) \
 		$(HOST_LD)
 	@mkdir -p $(@D)
