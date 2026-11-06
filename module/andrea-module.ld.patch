@@ -1,5 +1,5 @@
 --- /usr/ia16-elf/lib/dos-ms.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-module.ld	2024-03-21 17:29:23.200227027 +0100
++++ bin/andrea-module.ld	2026-11-07 20:00:00.000000000 +0100
 @@ -6,6 +6,7 @@
  
  OUTPUT_FORMAT(binary)
@@ -40,7 +40,7 @@
      .text : {
  		__stext = .;
 +
-+		INCLUDE ../include/andrea/header.ld
++		INCLUDE ../include/andrea.ldh
 +
  		*(.startupA)
  		*(.startupB)

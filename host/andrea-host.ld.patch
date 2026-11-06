@@ -1,5 +1,5 @@
 --- /usr/ia16-elf/lib/dos-mssl.ld	2024-02-18 23:02:32.000000000 +0100
-+++ bin/andrea-host.ld	2024-03-21 18:06:03.688158195 +0100
++++ bin/andrea-host.ld	2026-11-07 20:00:00.000000000 +0100
 @@ -7,6 +7,7 @@
  OUTPUT_FORMAT(binary)
  ENTRY(_start)
@@ -13,7 +13,7 @@
      .text : {
  		__stext = .;
 +
-+		INCLUDE ../include/andrea/header.ld
++		INCLUDE ../include/andrea.ldh
 +
  		*(.startupA)
  		*(.startupB)
