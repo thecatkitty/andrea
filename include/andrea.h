@@ -1,6 +1,7 @@
 #ifndef _ANDREA_H_
 #define _ANDREA_H_
 
+#include <errno.h>
 #include <stdint.h>
 
 #include <i86.h>
@@ -16,7 +17,11 @@
 ///
 /// Handle to a loaded Andrea module.
 ///
-typedef uint16_t andrea_module;
+/// Positive values refer to loaded modules.
+/// Zero refers to the host.
+/// Negative values notify error.
+///
+typedef int16_t andrea_module;
 
 #pragma pack(push, 1)
 
@@ -98,19 +103,6 @@ typedef union {
 #define ANDREA_SIGNATURE 0x61657226UL
 
 ///
-/// Return status of Andrea API calls.
-///
-typedef enum
-{
-    ANDREA_SUCCESS = 0x00,
-    ANDREA_ERROR_MISSING_PARAMETER = 0x80,
-    ANDREA_ERROR_INVALID_PARAMETER = 0x81,
-    ANDREA_ERROR_TOO_MANY_MODULES = 0x82,
-    ANDREA_ERROR_NO_EXPORTS = 0x83,
-    ANDREA_ERROR_PROTOCOL_MISMATCH = 0x84,
-} andrea_status;
-
-///
 /// Initializes the Andrea host, registering its exports.
 ///
 extern void
@@ -121,7 +113,9 @@ andrea_init(void);
 ///
 /// @param name File name of the requested module.
 ///
-/// @return Handle to the loaded module, 0 on error.
+/// @return Handle to the loaded module, negative on error.
+///         -EFTYPE - invalid file format.
+///         -ENFILE - too many modules.
 ///
 extern andrea_module
 andrea_load(const char *name);

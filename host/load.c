@@ -60,7 +60,7 @@ _load_module(const char *name, module_desc *desc)
     {
         LOG("protocol mismatch!");
         _dos_freemem(child);
-        status = -ANDREA_ERROR_PROTOCOL_MISMATCH;
+        status = -EFTYPE;
         goto end;
     }
 
@@ -129,13 +129,15 @@ andrea_load(const char *name)
     module_desc *desc = moddesc_from_module(0);
     if (NULL == desc)
     {
-        return ANDREA_ERROR_TOO_MANY_MODULES;
+        return -ENFILE; // Too many modules
     }
 
     andrea_module module = 0;
-    if (ANDREA_SUCCESS != _load_module(name, desc))
+    int           status = _load_module(name, desc);
+    if (0 != status)
     {
         LOG("cannot load module %s!", name);
+        module = status;
         goto end;
     }
 
