@@ -1,9 +1,17 @@
 #ifndef _ANDREA_H_
 #define _ANDREA_H_
 
+#include <stdint.h>
+
 #include <i86.h>
 
-#include <andrea/dosdef.h>
+#if !defined(far)
+#if defined(__FAR)
+#define far __far
+#else
+#define far
+#endif
+#endif
 
 ///
 /// Handle to a loaded Andrea module.
